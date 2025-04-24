@@ -1,7 +1,19 @@
 #include "patches.h"
 
+RECOMP_PATCH Gfx* dynGetMasterDisplayList(void) {
+    g_GfxRequestedDisplayList = TRUE;
+
+    Gfx* gdl = g_GfxBuffers[g_GfxActiveBufferIndex];
+
+    // @recomp: Enable RT64 Extended GBI
+    gEXEnable(gdl++);
+
+    return gdl;
+}
+
+// Set viewports (single player)
 #if 1
-RECOMP_PATCH Gfx* zbufClearCurrentPlayer(Gfx* gdl) __attribute__((optnone)) {
+RECOMP_PATCH Gfx* zbufClearCurrentPlayer(Gfx* gdl) {
     s32 start_x;
     s32 end_x;
 
@@ -10,10 +22,11 @@ RECOMP_PATCH Gfx* zbufClearCurrentPlayer(Gfx* gdl) __attribute__((optnone)) {
     gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, z_buffer_width, OS_K0_TO_PHYSICAL(z_buffer));
     gDPSetCycleType(gdl++, G_CYC_FILL);
     gDPSetFillColor(gdl++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0)));
-    
-    // @recomp: remove SetScissor
+
+    // @recomp: use gEXSetScissor instead
     // gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetX(), viGetY());
-    gEXSetScissor(gdl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, viGetY());
+    gEXSetScissor(gdl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 240);
+
     if (getPlayerCount() < 3) {
         start_x = 0;
         end_x = viGetX() - 1;
@@ -24,20 +37,39 @@ RECOMP_PATCH Gfx* zbufClearCurrentPlayer(Gfx* gdl) __attribute__((optnone)) {
         start_x = viGetX() / 2;
         end_x = viGetX() - 1;
     }
+
     gDPFillRectangle(gdl++, start_x, 0, end_x + 240, (z_buffer_height - 1));
     gDPPipeSync(gdl++);
+
     return gdl;
 }
 #endif
 
-/**
- * Provisory way to nuke the gDPSetScissor call inside this function,
- * this breaks multiplayer so it needs to be handled properly once we
- * fix the headers from the decomp.
- */
 #if 1
-RECOMP_PATCH Gfx* bgScissorCurrentPlayerView(Gfx* arg0, s32 left, s32 top, s32 width, s32 height) {
-    return arg0;
+RECOMP_PATCH Gfx* bgScissorCurrentPlayerView(Gfx* gdl, s32 left, s32 top, s32 width, s32 height) {
+    struct player* player = g_CurrentPlayer;
+
+    if (left < (s32) player->viewleft) {
+        left = (s32) player->viewleft;
+    }
+
+    if (top < (s32) player->viewtop) {
+        top = (s32) player->viewtop;
+    }
+
+    if (player->viewleft + player->viewx < width) {
+        width = player->viewleft + player->viewx;
+    }
+
+    if (player->viewtop + player->viewy < height) {
+        height = player->viewtop + player->viewy;
+    }
+
+    // @recomp: use gEXSetScissor instead
+    // gDPSetScissor(arg0++, G_SC_NON_INTERLACE, left, top, width, height);
+    gEXSetScissor(gdl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 240);
+
+    return gdl;
 }
 #endif
 
@@ -92,13 +124,52 @@ RECOMP_PATCH Gfx* currentPlayerDrawFade(Gfx* gdl) {
 }
 #endif
 
-RECOMP_PATCH Gfx *dynGetMasterDisplayList(void) {
-    g_GfxRequestedDisplayList = TRUE;
-    
-    Gfx* gdl = g_GfxBuffers[g_GfxActiveBufferIndex];
-    
-    // @recomp: Enable RT64 Extended GBI
-    gEXEnable(gdl++);
-    
-    return gdl;
+// @recomp: Culling of objects on the sides.
+#if 1
+RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void) {
+    f32 fx = -320.0f * 4.0f;            // @recomp:
+    f32 fy = 0;                         // @recomp:
+    f32 fwidth = (f32) viGetX() * 4.0f; // @recomp:
+    f32 fheight = (f32) viGetY();       // @recomp:
+
+    g_CurrentPlayer->screenxminf = (f32) viGetViewLeft() + 320.0f * -4.0f; // @recomp:
+
+    if (g_CurrentPlayer->screenxminf < fx) {
+        g_CurrentPlayer->screenxminf = fx;
+    }
+
+    if (fwidth < g_CurrentPlayer->screenxminf) {
+        g_CurrentPlayer->screenxminf = fwidth;
+    }
+
+    g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
+
+    if (g_CurrentPlayer->screenyminf < fy) {
+        g_CurrentPlayer->screenyminf = fy;
+    }
+
+    if (fheight < g_CurrentPlayer->screenyminf) {
+        g_CurrentPlayer->screenyminf = fheight;
+    }
+
+    g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth() + 320.0f * 4.0f); // @recomp:
+
+    if (g_CurrentPlayer->screenxmaxf < fx) {
+        g_CurrentPlayer->screenxmaxf = fx;
+    }
+
+    if (fwidth < g_CurrentPlayer->screenxmaxf) {
+        g_CurrentPlayer->screenxmaxf = fwidth;
+    }
+
+    g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
+
+    if (g_CurrentPlayer->screenymaxf < fy) {
+        g_CurrentPlayer->screenymaxf = fy;
+    }
+
+    if (fheight < g_CurrentPlayer->screenymaxf) {
+        g_CurrentPlayer->screenymaxf = fheight;
+    }
 }
+#endif

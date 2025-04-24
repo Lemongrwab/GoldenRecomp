@@ -1,27 +1,8 @@
 #include "patches.h"
 
-#include "PR/R4300.h"
-#include "PR/ultratypes.h"
-#include "PR/os.h"
-#include "misc_funcs.h"
-
 int dummy;
 int dummy3 = 0;
 
-u32 __osSetFpcCsr(u32);
-u32 __osSetFpcCsr(u32);
-void* setSPToEnd(u8* stack, u32 size);
-void mainproc(void* args);
-void osInitialize(void);
-int recomp_printf(const char* fmt, ...);
-s32 boot_osPiRawStartDma(s32, u32, void*, u32);
-void osCreateThread(OSThread*, OSId, void (*)(void*), void*, void*, OSPri);
-
-extern u8 sp_main[32768];
-extern OSThread mainThread;
-extern s32* stack_pointer;
-
-#if 1
 RECOMP_PATCH void init(void) {
     s32 inflate_code_size;
     s32* stack_pointer;
@@ -51,8 +32,10 @@ RECOMP_PATCH void init(void) {
     stack_pointer = setSPToEnd(sp_main, sizeof(sp_main));
     osCreateThread(&mainThread, (OSId) 3, &mainproc, NULL, stack_pointer, (OSPri) 10);
     osStartThread(&mainThread);
+
+    // @recomp: ModelDistance always disabled
+    g_ModelDistanceDisabled = 1;
 }
-#endif
 
 /**
  * Stubbing this since it causes the runtime to crash while trying to resolve rmonMain

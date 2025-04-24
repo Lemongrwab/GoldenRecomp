@@ -49,22 +49,19 @@ RECOMP_PATCH void musicTrack1Play(s32 track) __attribute__((optnone)) {
 #endif
 
 #if 1
-RECOMP_PATCH void musicTrack2Play(s32 track)
-{
+RECOMP_PATCH void musicTrack2Play(s32 track) __attribute__((optnone)) {
     u32 trackSizeBytes;
     struct music_struct_b thing;
-    u8 *temp_a0;
-    void *romAddress;
+    u8* temp_a0;
+    void* romAddress;
     u32 t3;
     struct huft hlist;
 
-    if (g_sndBootswitchSound)
-    {
+    if (g_sndBootswitchSound) {
         return;
     }
 
-    if (g_musicXTrack2CurrentTrackNum)
-    {
+    if (g_musicXTrack2CurrentTrackNum) {
         musicTrack2Stop();
     }
 
@@ -77,8 +74,7 @@ RECOMP_PATCH void musicTrack2Play(s32 track)
 
     romAddress = g_musicDataTable->seqArray[g_musicXTrack2CurrentTrackNum].address;
 
-    if (romAddress < (void*)ROM_MUSIC_START_OFFSET)
-    {
+    if (romAddress < (void*) ROM_MUSIC_START_OFFSET) {
         // Note: recursive call
         musicTrack2Play(M_SHORT_SOLO_DEATH);
 
@@ -88,7 +84,7 @@ RECOMP_PATCH void musicTrack2Play(s32 track)
     t3 = ALIGN16_a(g_musicTrackLength[g_musicXTrack2CurrentTrackNum]) + ALIGN16_a(NUM_MUSIC_TRACKS);
     trackSizeBytes = ALIGN16_a(g_musicTrackCompressedLength[g_musicXTrack2CurrentTrackNum]);
     thing.seqData = g_musicXTrack2SeqData;
-    temp_a0 = (u8*)((t3 + (s32)thing.seqData) - trackSizeBytes);
+    temp_a0 = (u8*) ((t3 + (s32) thing.seqData) - trackSizeBytes);
 
     romCopy(temp_a0, romAddress, trackSizeBytes);
     decompressdata(temp_a0, thing.seqData, &hlist);

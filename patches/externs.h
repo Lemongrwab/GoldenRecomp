@@ -22,8 +22,24 @@ s16 viGetY(void);
 s32 get_cur_playernum(void);
 s32 getPlayerCount(void);
 
+u16 joyGetButtons(s8 contpadnum, u16 mask);
+u16 joyGetButtonsPressedThisFrame(s8 contpadnum, u16 mask);
+
 f32 bondviewGetPauseAnimationPercent(void);
 u32 cur_player_get_screen_setting(void);
+void currentPlayerSetScreenPosition(f32 left, f32 top);
+
+s32 alCSPGetState(ALCSPlayer* seqp);
+void musicTrack1Stop(void);
+void musicTrack1ApplySeqpVol(u16 volume);
+void romCopy(void* target, void* source, u32 size);
+u32 decompressdata(u8* src, u8* dst, struct huft* hlist);
+u16 musicTrack1GetVolume(void);
+void musicTrack2ApplySeqpVol(u16 volume);
+u16 musicTrack2GetVolume(void);
+void alCSPPlay(ALCSPlayer *seqp);
+void alCSPSetSeq(ALCSPlayer *seqp, ALCSeq *seq);
+void musicTrack2Stop(void);
 
 extern struct player *g_CurrentPlayer;
 extern s32 cameraFrameCounter1;
@@ -40,5 +56,19 @@ extern s32 g_ModelDistanceDisabled;
 extern u8 *g_GfxBuffers[3];
 extern u8 g_GfxActiveBufferIndex;
 extern s32 g_GfxRequestedDisplayList;
+extern VideoSettings *g_ViBackData;
+extern s32 bgViewRelated[4];
+extern s32 g_musicXTrack2CurrentTrackNum;
+extern ALCSPlayer *g_musicXTrack2SeqPlayer;
+extern s8 g_sndBootswitchSound;
+extern s32 g_musicXTrack1CurrentTrackNum;
+extern ALCSPlayer* g_musicXTrack1SeqPlayer;
+extern u16 g_musicTrackLength[64];
+extern u16 g_musicTrackCompressedLength[63];
+extern u8* g_musicXTrack1SeqData;
+extern RareALSeqBankFile* g_musicDataTable;
+extern ALCSeq g_musicXTrack1Seq;
+extern u8 *g_musicXTrack2SeqData;
+extern ALCSeq g_musicXTrack2Seq;
 
 #endif

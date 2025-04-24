@@ -3,8 +3,78 @@
 
 #include "patches.h"
 
+#define ROM_MUSIC_START_OFFSET 0x10000U
+#define NUM_MUSIC_TRACKS 63
+#define ALIGN16_a(val) (((val) + 0xf | 0xf) ^ 0xf)
+
 #define PROPRECORD_STAN_ROOM_LEN 4
 #define WATCH_NUMBER_SCREENS 5
+
+typedef enum MUSIC_TRACKS {
+    M_NONE,
+    M_SHORT_SOLO_DEATH,
+    M_INTRO,
+    M_TRAIN,
+    M_DEPOT,
+    M_MPTHEME,
+    M_CITADEL,
+    M_FACILITY,
+    M_CONTROL,
+    M_DAM,
+    M_FRIGATE,
+    M_ARCHIVES,
+    M_SILO,
+    M_MPTHEME2,
+    M_STREETS,
+    M_BUNKER1,
+    M_BUNKER2,
+    M_STATUE,
+    M_ELEVATOR_CONTROL,
+    M_CRADLE,
+    M_UNK,
+    M_ELEVATOR_WC,
+    M_EGYPTIAN,
+    M_FOLDERS,
+    M_WATCH,
+    M_AZTEC,
+    M_WATERCAVERNS,
+    M_DEATHSOLO,
+    M_SURFACE2,
+    M_TRAINX,
+    M_UNK2,
+    M_FACILITYX,
+    M_DEPOTX,
+    M_CONTROLX,
+    M_WATERCAVERNSX,
+    M_DAMX,
+    M_FRIGATEX,
+    M_ARCHIVESX,
+    M_SILOX,
+    M_EGYPTIANX,
+    M_STREETSX,
+    M_BUNKER1X,
+    M_BUNKER2X,
+    M_JUNGLEX,
+    M_INTROSWOOSH,
+    M_STATUEX,
+    M_AZTECX,
+    M_EGYPTX,
+    M_CRADLEX,
+    M_CUBA,
+    M_RUNWAY,
+    M_RUNWAYPLANE,
+    M_MPTHEME3,
+    M_WIND,
+    M_GUITARGLISS,
+    M_JUNGLE,
+    M_RUNWAYX,
+    M_SURFACE1,
+    M_MPDEATH,
+    M_SURFACE2X,
+    M_SURFACE2END,
+    M_STATUEPART,
+    M_END_SOMETHING
+} MUSIC_TRACKS;
 
 typedef enum SCREEN_SIZE_OPTION {
     SCREEN_SIZE_FULLSCREEN,
@@ -104,6 +174,86 @@ typedef enum ITEM_IDS {
     ITEM_TOKEN,
     ITEM_IDS_MAX
 } ITEM_IDS;
+
+typedef struct {
+    // address is offset from the start of .sbk file
+    u8* address;
+
+    // seq length after uncompressed.
+    u16 uncompressed_len;
+
+    // len is data segment length in the rom. This is the 1172 compressed length.
+    u16 len;
+} RareALSeqData;
+
+/**
+ * Structure for storing collection of sequence metadatas.
+ * These are stored 1172 compressed.
+ * Based on original ALSeqFile in n64devkit\ultra\usr\include\PR\libaudio.h.
+ */
+typedef struct {
+    /**
+     * number of sequences.
+     */
+    u16 seqCount;
+
+    /**
+     * Unknown, maybe unused padding.
+     */
+    u16 unk;
+
+    /**
+     * ARRAY of sequence info. This is a "dynamic" array, more space
+     * will be allocated from ALHeap at runtime.
+     */
+    RareALSeqData seqArray[1];
+} RareALSeqBankFile;
+
+struct music_struct_b {
+    u8 data[8438];
+    u8* seqData;
+};
+
+struct huft {
+    u8 e; /* number of extra bits or operation */
+    u8 b; /* number of bits in this code or subcode */
+    union {
+        u16 n;          /* literal, length base, or distance base */
+        struct huft* t; /* pointer to next level of table */
+    } v;
+};
+
+typedef struct VideoSettings_s {
+    /**
+     * enum VIDEOMODE.
+     */
+    u8 mode;
+    s8 field_01;
+    s8 field_02;
+    s8 field_03;
+    s16 x;
+    s16 y;
+    f32 fovy;
+    f32 aspect;
+    f32 znear;
+    f32 zfar;
+
+    /**
+     * Screen width.
+     */
+    s16 bufx;
+
+    /**
+     * Screen height.
+     */
+    s16 bufy;
+    s16 viewx;
+    s16 viewy;
+    s16 viewleft;
+    s16 viewtop;
+    s32 usezbuf;
+    u8* framebuf;
+} VideoSettings;
 
 typedef struct coord16 {
     union {

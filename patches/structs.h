@@ -175,6 +175,59 @@ typedef enum ITEM_IDS {
     ITEM_IDS_MAX
 } ITEM_IDS;
 
+typedef struct CurrentEnvironmentRecord {
+    s32 DifferenceFromFarIntensity;
+    s32 FarIntensity;
+    u8 Red;
+    u8 Green;
+    u8 Blue;
+    u8 Clouds;
+    f32 CloudRepeat;
+    s16 SkyImageId;
+    u16 Reserved;
+    f32 CloudRed;
+    f32 CloudGreen;
+    f32 CloudBlue;
+    u8 IsWater;
+    u8 Padding[3];
+    f32 WaterRepeat;
+    s16 WaterImageId;
+    u16 Reserved2;
+    f32 WaterRed;
+    f32 WaterGreen;
+    f32 WaterBlue;
+    f32 WaterConcavity;
+} CurrentEnvironmentRecord;
+
+typedef struct SkyRelated18 {
+    f32 unk00; /*0x00*/
+    f32 unk04; /*0x04*/
+    f32 unk08; /*0x08*/
+    f32 unk0c; /*0x0c*/
+    f32 unk10; /*0x10*/
+    u8 r;      /*0x14*/
+    u8 g;      /*0x15*/
+    u8 b;      /*0x16*/
+    u8 a;      /*0x17*/
+} SkyRelated18;
+
+typedef struct SkyRelated38 {
+    f32 unk00; /*0x00*/
+    f32 unk04; /*0x04*/
+    f32 unk08; /*0x08*/
+    f32 unk0c; /*0x0c*/
+    f32 r;     /*0x10*/
+    f32 g;     /*0x14*/
+    f32 b;     /*0x18*/
+    f32 a;     /*0x1c*/
+    f32 unk20; /*0x20*/
+    f32 unk24; /*0x24*/
+    f32 unk28; /*0x28*/
+    f32 unk2c; /*0x2c*/
+    f32 unk30; /*0x30*/
+    f32 unk34; /*0x34*/
+} SkyRelated38;
+
 typedef struct {
     // address is offset from the start of .sbk file
     u8* address;
@@ -282,8 +335,8 @@ typedef struct StandTileHeaderTail {
 } StandTileHeaderTail;
 
 typedef struct StandTilePoint {
-    struct coord16; // points for tile
-    u16 link;       // link to nother tile
+    coord16 sega; // points for tile
+    u16 link;     // link to nother tile
 } StandTilePoint;
 
 typedef struct StandTile {
@@ -486,8 +539,21 @@ typedef struct ModelAnimation {
 
 typedef union {
     f32 m[4][4];
+    u32 l[4][4];
     s32 unused;
 } Mtxf;
+
+typedef struct sImageTableEntry {
+    u32 index;
+    u8 width;
+    u8 height;
+    u8 level;
+    u8 format;
+    u8 depth;
+    u8 flagsS;
+    u8 flagsT;
+    u8 pad;
+} sImageTableEntry;
 
 typedef union {
     Mtxf pos;
@@ -1096,8 +1162,8 @@ typedef struct InvItem {
 } InvItem;
 
 struct WatchVertex {
-    struct coord16 coord1;
-    struct coord16 coord2;
+    coord16 coord1;
+    coord16 coord2;
     struct rgba_u8 color;
 };
 

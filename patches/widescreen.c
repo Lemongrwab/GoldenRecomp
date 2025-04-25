@@ -3,7 +3,7 @@
 RECOMP_PATCH Gfx* dynGetMasterDisplayList(void) {
     g_GfxRequestedDisplayList = TRUE;
 
-    Gfx* gdl = g_GfxBuffers[g_GfxActiveBufferIndex];
+    Gfx* gdl = (Gfx*) g_GfxBuffers[g_GfxActiveBufferIndex];
 
     // @recomp: Enable RT64 Extended GBI
     gEXEnable(gdl++);

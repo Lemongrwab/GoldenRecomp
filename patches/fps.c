@@ -22,12 +22,11 @@ RECOMP_PATCH void waitForNextFrame(void) __attribute__((optnone)) // maybe WaitF
     u32 nextFrameTime; // next frame time?
 
     do {
-        nextFrameTime =
-            ((osGetCount_recomp() - copy_of_osgetcount_value_1) + MAIN_LOOP_TICK_INTERVAL) / 0xbd6c3U; // current time + 1/5
+        nextFrameTime = ((osGetCount_recomp() - copy_of_osgetcount_value_1) + MAIN_LOOP_TICK_INTERVAL) /
+                        ((MAIN_LOOP_TICK_INTERVAL * 2) + 1); // current time + 1/5
     } while (nextFrameTime < frameDelay);
 
     frameDelay = 1;
     updateFrameCounters(nextFrameTime);
 }
 #endif
-

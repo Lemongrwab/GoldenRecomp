@@ -1,7 +1,7 @@
 #include "patches.h"
 
 int dummy;
-int dummy3 = 0;
+int dummy3 = 1;
 
 RECOMP_PATCH void init(void) {
     s32 inflate_code_size;

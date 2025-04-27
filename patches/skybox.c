@@ -2,47 +2,6 @@
 #include "gbi_extension.h"
 
 #if 0
-void mtxF2L(Mtxf* src, Mtxf* dst);void *dynAllocate(s32 size);
-static f32 var8005ef10[] = { 65536, 65536 };
-
-#if 1
-void mtxF2L(Mtxf* src, Mtxf* dst) {
-    u32 src00 = (s32) (src->m[0][0] * 65536);
-    u32 src01 = (s32) (src->m[0][1] * 65536);
-    u32 src02 = (s32) (src->m[0][2] * 65536);
-    u32 src03 = (s32) (src->m[0][3] * 65536);
-    u32 src10 = (s32) (src->m[1][0] * 65536);
-    u32 src11 = (s32) (src->m[1][1] * 65536);
-    u32 src12 = (s32) (src->m[1][2] * 65536);
-    u32 src13 = (s32) (src->m[1][3] * 65536);
-    u32 src20 = (s32) (src->m[2][0] * 65536);
-    u32 src21 = (s32) (src->m[2][1] * 65536);
-    u32 src22 = (s32) (src->m[2][2] * 65536);
-    u32 src23 = (s32) (src->m[2][3] * 65536);
-    u32 src30 = (s32) (src->m[3][0] * 65536);
-    u32 src31 = (s32) (src->m[3][1] * 65536);
-    u32 src32 = (s32) (src->m[3][2] * 65536);
-    u32 src33 = (s32) (src->m[3][3] * 65536);
-
-    dst->l[0][0] = (src00 & 0xffff0000) | src01 >> 16;
-    dst->l[0][1] = (src02 & 0xffff0000) | src03 >> 16;
-    dst->l[0][2] = (src10 & 0xffff0000) | src11 >> 16;
-    dst->l[0][3] = (src12 & 0xffff0000) | src13 >> 16;
-    dst->l[1][0] = (src20 & 0xffff0000) | src21 >> 16;
-    dst->l[1][1] = (src22 & 0xffff0000) | src23 >> 16;
-    dst->l[1][2] = (src30 & 0xffff0000) | src31 >> 16;
-    dst->l[1][3] = (src32 & 0xffff0000) | src33 >> 16;
-
-    dst->l[2][0] = src00 << 16 | (src01 & 0xffff);
-    dst->l[2][1] = src02 << 16 | (src03 & 0xffff);
-    dst->l[2][2] = src10 << 16 | (src11 & 0xffff);
-    dst->l[2][3] = src12 << 16 | (src13 & 0xffff);
-    dst->l[3][0] = src20 << 16 | (src21 & 0xffff);
-    dst->l[3][1] = src22 << 16 | (src23 & 0xffff);
-    dst->l[3][2] = src30 << 16 | (src31 & 0xffff);
-    dst->l[3][3] = src32 << 16 | (src33 & 0xffff);
-}
-#endif
 
 RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
     coord3d sp6a4;
@@ -133,10 +92,17 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
 
     gdl = viSetFillColor(gdl, env->Red, env->Green, env->Blue);
 
+#ifdef PLATFORM_N64
     sub_GAME_7F093880(0.0f, 0.0f, &sp6a4);
     sub_GAME_7F093880(getPlayer_c_screenwidth() - 0.1f, 0.0f, &sp698);
     sub_GAME_7F093880(0.0f, getPlayer_c_screenheight() - 0.1f, &sp68c);
     sub_GAME_7F093880(getPlayer_c_screenwidth() - 0.1f, getPlayer_c_screenheight() - 0.1f, &sp680);
+#else
+    sub_GAME_7F093880(-4.0f, -4.0f, &sp6a4);
+    sub_GAME_7F093880(getPlayer_c_screenwidth() + 4.0f, -4.0f, &sp698);
+    sub_GAME_7F093880(-4.0f, getPlayer_c_screenheight() + 4.0f, &sp68c);
+    sub_GAME_7F093880(getPlayer_c_screenwidth() + 4.0f, getPlayer_c_screenheight() + 4.0f, &sp680);
+#endif
 
     sp538 = sub_GAME_7F0938FC(&sp6a4, &sp644, &sp58c);
     sp534 = sub_GAME_7F0938FC(&sp698, &sp638, &sp588);
@@ -630,29 +596,70 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
             gDPPipeSync(gdl++);
             gDPSetTexturePersp(gdl++, G_TP_PERSP);
         } else {
+            // *(volatile int*) 0 = 0;
             gDPPipeSync(gdl++);
 
             texSelect(&gdl, &skywaterimages[fogGetCurrentEnvironmentp()->WaterImageId], 1, 0, 2);
             gdl = sub_GAME_7F09343C(gdl, 0); // ???
             gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 
-            if (s1 == 4) {
-                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[3], 130.0f, TRUE);
+            // if (s1 == 4) {
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[3], 130.0f, TRUE);
+            //
+            //     if (sp430) {
+            //         sp274[0].unk2c++;
+            //         sp274[1].unk2c++;
+            //         sp274[2].unk2c++;
+            //         sp274[3].unk2c++;
+            //     }
+            //
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[3], &sp274[2], &sp274[0], 130.0f, TRUE);
+            // } else if (s1 == 5) {
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[2], &sp274[3], 130.0f, TRUE);
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[3], &sp274[4], 130.0f, TRUE);
+            // } else if (s1 == 3) {
+            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
+            // }
+            {
+                s32 i;
+                Vtx* verts = dynAllocate7F0BD6C4(s1);
+                Mtxf mtx;
+                Mtx* mtx_render = dynAllocateMatrix();
 
-                if (sp430) {
-                    sp274[0].unk2c++;
-                    sp274[1].unk2c++;
-                    sp274[2].unk2c++;
-                    sp274[3].unk2c++;
+                matrix_4x4_multiply(camGetWorldToScreenMtxf(), &dword_CODE_bss_80079E98, &mtx);
+                matrix_4x4_f32_to_s32(&mtx, mtx_render);
+                // mtxF2L(&mtx, mtx_render);
+
+                gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+
+                gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(mtx_render), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+                gSPVertex(gdl++, osVirtualToPhysical(verts), s1, 0);
+
+                for (i = 0; i < s1; i++) {
+                    verts[i].v.ob[0] = sp43c[i].unk00;
+                    verts[i].v.ob[1] = sp43c[i].unk04;
+                    verts[i].v.ob[2] = sp43c[i].unk08;
+                    verts[i].v.tc[0] = skyClamp(sp43c[i].unk0c * 0.1f + g_SkyCloudOffset, -32768.f, 32767.f);
+                    verts[i].v.tc[1] =
+                        skyClamp((sp43c[i].unk10 - g_SkyCloudOffset) * 0.1f + g_SkyCloudOffset, -32768.f, 32767.f);
+                    verts[i].v.cn[0] = sp43c[i].r;
+                    verts[i].v.cn[1] = sp43c[i].g;
+                    verts[i].v.cn[2] = sp43c[i].b;
+                    verts[i].v.cn[3] = sp43c[i].a;
                 }
 
-                gdl = sub_GAME_7F097818(gdl, &sp274[3], &sp274[2], &sp274[0], 130.0f, TRUE);
-            } else if (s1 == 5) {
-                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
-                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[2], &sp274[3], 130.0f, TRUE);
-                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[3], &sp274[4], 130.0f, TRUE);
-            } else if (s1 == 3) {
-                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
+                // gSP2Triangles(gdl++, 0, 1, 2, 0, 0, 2, 3, 0);
+
+                if (s1 == 4) {
+                    gDPTri2(gdl++, 0, 1, 3, 3, 2, 0);
+                } else if (s1 == 5) {
+                    gDPTri3(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4);
+                } else if (s1 == 3) {
+                    gDPTri1(gdl++, 0, 1, 2);
+                }
+
+                // gSPPopMatrix(gdl++, G_MTX_MODELVIEW); // <-- Crashes RT64 ?
             }
         }
     }
@@ -1072,14 +1079,10 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
         }
 
 #if 0
-        if (s1 == 4)
-        {
-            if (((sp538 << 3) | (sp534 << 2) | (sp530 << 1) | sp52c) == 12)
-            {
-                if (sp548 < sp54c)
-                {
-                    if (sp94[3].unk2c >= sp94[1].unk2c + 4.0f)
-                    {
+        if (s1 == 4) {
+            if (((sp538 << 3) | (sp534 << 2) | (sp530 << 1) | sp52c) == 12) {
+                if (sp548 < sp54c) {
+                    if (sp94[3].unk2c >= sp94[1].unk2c + 4.0f) {
                         sp94[0].unk28 = getPlayer_c_screenleft() * 4.0f;
                         sp94[0].unk2c = getPlayer_c_screentop() * 4.0f;
                         sp94[1].unk28 = (getPlayer_c_screenleft() + getPlayer_c_screenwidth()) * 4.0f - 1.0f;
@@ -1088,14 +1091,10 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                         sp94[3].unk28 = (getPlayer_c_screenleft() + getPlayer_c_screenwidth()) * 4.0f - 1.0f;
 
                         gdl = sub_GAME_7F098A2C(gdl, &sp94[0], &sp94[1], &sp94[2], &sp94[3], 130.0f);
-                    }
-                    else
-                    {
+                    } else {
                         gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[1], &sp94[2], 130.0f, TRUE);
                     }
-                }
-                else if (sp94[2].unk2c >= sp94[0].unk2c + 4.0f)
-                {
+                } else if (sp94[2].unk2c >= sp94[0].unk2c + 4.0f) {
                     sp94[0].unk28 = getPlayer_c_screenleft() * 4.0f;
                     sp94[0].unk2c = getPlayer_c_screentop() * 4.0f;
                     sp94[1].unk28 = (getPlayer_c_screenleft() + getPlayer_c_screenwidth()) * 4.0f - 1.0f;
@@ -1104,41 +1103,32 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                     sp94[3].unk28 = (getPlayer_c_screenleft() + getPlayer_c_screenwidth()) * 4.0f - 1.0f;
 
                     gdl = sub_GAME_7F098A2C(gdl, &sp94[1], &sp94[0], &sp94[3], &sp94[2], 130.0f);
-                }
-                else
-                {
+                } else {
                     gdl = sub_GAME_7F097818(gdl, &sp94[1], &sp94[0], &sp94[3], 130.0f, TRUE);
                 }
-            }
-            else
-            {
+            } else {
                 gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[1], &sp94[3], 130.0f, TRUE);
                 gdl = sub_GAME_7F097818(gdl, &sp94[3], &sp94[2], &sp94[0], 130.0f, TRUE);
             }
-        }
-        else if (s1 == 5)
-        {
+        } else if (s1 == 5) {
             gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[1], &sp94[2], 130.0f, TRUE);
             gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[2], &sp94[3], 130.0f, TRUE);
             gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[3], &sp94[4], 130.0f, TRUE);
-        }
-        else if (s1 == 3)
-        {
+        } else if (s1 == 3) {
             gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[1], &sp94[2], 130.0f, TRUE);
         }
-    }
 #else
         {
             s32 i;
             Vtx* verts = dynAllocate7F0BD6C4(s1);
-            // Col* cols = dynAllocate(s1 * sizeof(Col));
-            Mtxf* mtx = dynAllocate(sizeof(Mtxf));
-            matrix_4x4_multiply(camGetWorldToScreenMtxf(), &dword_CODE_bss_80079E98, mtx);
-            mtxF2L((Mtxf*)mtx, (Mtxf*)mtx);
+            Mtxf mtx;
+            Mtx* mtx_render = dynAllocateMatrix();
+
+            matrix_4x4_multiply(camGetWorldToScreenMtxf(), &dword_CODE_bss_80079E98, &mtx);
+            matrix_4x4_f32_to_s32(&mtx, mtx_render);
 
             // gSPSetExtraGeometryModeEXT(gdl++, 0x00000100);
-            gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
-            // gSPColor(gdl++, osVirtualToPhysical(cols), s1);
+            gSPMatrix(gdl++, osVirtualToPhysical(mtx_render), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
             gSPVertex(gdl++, osVirtualToPhysical(verts), s1, 0);
 
             for (i = 0; i < s1; ++i) {
@@ -1147,7 +1137,6 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                 verts[i].v.ob[2] = sp4b4[i].unk08;
                 verts[i].v.tc[0] = skyClamp(sp4b4[i].unk0c, -32768.f, 32767.f);
                 verts[i].v.tc[1] = skyClamp(sp4b4[i].unk10, -32768.f, 32767.f);
-                // verts[i].colour = i * 4;
                 verts[i].v.cn[0] = sp4b4[i].r;
                 verts[i].v.cn[1] = sp4b4[i].g;
                 verts[i].v.cn[2] = sp4b4[i].b;
@@ -1163,10 +1152,10 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
             gDPTri1(gdl++, 0, 1, 2);
         }
 
-        gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
+        // gSPPopMatrix(gdl++, G_MTX_MODELVIEW); // <-- Crashes RT64 ?
         // gSPClearExtraGeometryModeEXT(gdl++, 0x00000100);
-    }
 #endif
+    }
 
     return gdl;
 }

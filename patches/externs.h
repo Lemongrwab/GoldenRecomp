@@ -71,7 +71,11 @@ Gfx* sub_GAME_7F09343C(Gfx*, s32);
 void updateFrameCounters(s32 deltaFrames);
 int sprintf_recomp(char* s, const char* fmt, ...);
 u32 osGetCount_recomp(void);
-
+void matrix_4x4_f32_to_s32(Mtxf* a, Mtxf* b);
+void* dynAllocate(s32 size);
+Gfx* sub_GAME_7F098A2C(Gfx* gdl, SkyRelated38* arg1, SkyRelated38* arg2, SkyRelated38* arg3, SkyRelated38* arg4,
+                       f32 arg5);
+                       
 extern struct sImageTableEntry *skywaterimages;
 extern Mtxf dword_CODE_bss_80079E98;
 extern f32 g_SkyCloudOffset;

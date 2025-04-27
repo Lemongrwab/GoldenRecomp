@@ -7,6 +7,7 @@ RECOMP_PATCH Gfx* dynGetMasterDisplayList(void) {
 
     // @recomp: Enable RT64 Extended GBI
     gEXEnable(gdl++);
+    gEXSetRefreshRate(gdl++, 60 / speedgraphframes);
 
     return gdl;
 }

@@ -68,6 +68,9 @@ void/*Vtx?*/ *dynAllocate7F0BD6C4(s32 count);
 void skyChooseCloudVtxColour(SkyRelated18 *arg0, f32 arg1);
 Gfx *sub_GAME_7F097818(Gfx *gdl, SkyRelated38 *arg1, SkyRelated38 *arg2, SkyRelated38 *arg3, f32 arg4, s32 textured);
 Gfx* sub_GAME_7F09343C(Gfx*, s32);
+void updateFrameCounters(s32 deltaFrames);
+int sprintf_recomp(char* s, const char* fmt, ...);
+u32 osGetCount_recomp(void);
 
 extern struct sImageTableEntry *skywaterimages;
 extern Mtxf dword_CODE_bss_80079E98;
@@ -105,5 +108,9 @@ extern s32 g_musicXTrack3CurrentTrackNum;
 extern ALCSPlayer* g_musicXTrack3SeqPlayer;
 extern u8* g_musicXTrack3SeqData;
 extern ALCSeq g_musicXTrack3Seq;
+extern s32 g_ClockTimer;
+extern s32 speedgraphframes;
+extern s32 frameDelay;
+extern u32 copy_of_osgetcount_value_1;
 
 #endif

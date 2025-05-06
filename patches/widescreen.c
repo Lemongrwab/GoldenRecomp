@@ -82,19 +82,17 @@ RECOMP_PATCH void modelSetDistanceDisabled(s32 param_1) {
 #endif
 
 #if 1
-RECOMP_PATCH Gfx* currentPlayerDrawFade(Gfx* gdl) {
+RECOMP_PATCH Gfx *currentPlayerDrawFade(Gfx *gdl) {
     f32 frac = g_CurrentPlayer->colourscreenfrac;
     s32 r = g_CurrentPlayer->colourscreenred;
     s32 g = g_CurrentPlayer->colourscreengreen;
     s32 b = g_CurrentPlayer->colourscreenblue;
-
     if ((cameraFrameCounter1 != 0) || (cameraFrameCounter2 != 0)) {
         frac = 1.0f;
         b = 0;
         g = 0;
         r = 0;
     }
-
     if (frac > 0) {
         gDPPipeSync(gdl++);
         gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -107,8 +105,8 @@ RECOMP_PATCH Gfx* currentPlayerDrawFade(Gfx* gdl) {
         gDPSetTextureLUT(gdl++, G_TT_NONE);
         gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-        gDPSetPrimColor(gdl++, 0, 0, r, g, b, (s32) (frac * 255.0f));
-
+        gDPSetPrimColor(gdl++, 0, 0, r, g, b, (s32)(frac * 255.0f));
+        
         // gDPFillRectangle(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()),
         // (viGetViewTop() + viGetViewHeight()));
 
@@ -173,4 +171,145 @@ RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void) {
         g_CurrentPlayer->screenymaxf = fheight;
     }
 }
+#endif
+
+#if 1
+RECOMP_PATCH f32 getinstsize(Model *arg0)
+{   
+    f32 ret = 0.0f;
+
+    #if defined(LEFTOVERDEBUG)
+    if (arg0 == NULL)
+    {
+        osSyncPrintf("getinstsize: no objinst!\n");
+        return_null();
+    }
+
+    if (arg0->obj == NULL)
+    {
+        osSyncPrintf("getinstsize: no objdesc!\n");
+        return_null();
+    }
+    #endif
+
+    ret = arg0->obj->BoundingVolumeRadius * arg0->scale * 4;
+
+    return ret;
+}
+#endif
+
+#if 0
+extern ModelRenderData D_80031FD0;
+s32 fogGetPropDistColor(PropRecord* prop, struct rgba_f32* color);
+f32 chrobjFogVisRangeRelated(PropRecord* prop, f32 size);
+f32 getinstsize(Model* arg0);
+s32 sub_GAME_7F054A64(PropRecord* prop, bbox2d* bbox);
+Gfx* bgScissorCurrentPlayerViewF(Gfx* arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4);
+Gfx* bgScissorCurrentPlayerViewDefault(Gfx* arg0);
+s32 objGetShotsTaken(ObjectRecord* obj);
+void sub_GAME_7F040384(rgba_s32* arg0, s32 arg1, rgba_f32* arg2);
+void sub_GAME_7F04AC20(PropRecord* prop, ModelRenderData*, s32 arg2);
+
+RECOMP_PATCH Gfx* chrobjRenderProp(PropRecord* prop, Gfx* gdl, s32 arg2) __attribute__((optnone)) {
+    struct rgba_f32 spB0;
+    s32 spAC;
+    s32 spA8;
+    ModelRenderData mrData;
+    struct view4f sp58;
+    struct rgba_s32 sp48;
+    s32 sp44;
+    ObjectRecord* obj;
+    s32 objAlpha;
+    f32 temp_f0;
+    s32 temp_v0_4;
+    s32 phi_a0;
+
+    obj = prop->obj;
+
+    mrData = D_80031FD0;
+
+    objAlpha = 0xFF;
+    spAC = fogGetPropDistColor(prop, &spB0);
+
+    if (spAC == 0) {
+        return gdl;
+    }
+
+    if ((u8) (((PropDefHeaderRecord*)obj)->type) != PROPDEF_TINTED_GLASS) {
+        temp_f0 = chrobjFogVisRangeRelated(prop, getinstsize(obj->model));
+
+        if (((s32) prop->timetoregen > 0) && ((s32) prop->timetoregen < CHROBJ_TIMETOREGEN)) {
+            temp_f0 *= ((CHROBJ_TIMETOREGEN_F - (f32) prop->timetoregen) / CHROBJ_TIMETOREGEN_F);
+        }
+
+        objAlpha = (s32) (temp_f0 * 255.0f);
+
+        if (objAlpha <= 0) {
+            return gdl;
+        }
+    }
+
+    if ((objAlpha < 0xFF) || (obj->flags2 & 0x10000)) {
+        if (arg2 == 0) {
+            return gdl;
+        }
+
+        sp44 = 3;
+    } else {
+
+        sp44 = (arg2 == 0) ? 1 : 2;
+    }
+
+    if ((sub_GAME_7F054A64(prop, &sp58) > 0) && (((s32) obj->flags2 << 5) >= 0)) {
+        gdl = bgScissorCurrentPlayerViewF(gdl, sp58.left, sp58.top, sp58.width, sp58.height);
+    } else {
+        gdl = bgScissorCurrentPlayerViewDefault(gdl);
+    }
+
+    mrData.flags = sp44;
+    mrData.zbufferenabled = (obj->flags2 & 0x10000) == 0;
+
+    mrData.gdl = gdl;
+
+    if (objAlpha < 0xFF) {
+        mrData.PropType = 5;
+        mrData.envcolour.word = objAlpha;
+    } else {
+        mrData.PropType = 9;
+
+        if (((PropDefHeaderRecord*)obj)->type == PROPDEF_TINTED_GLASS) {
+            mrData.envcolour.word = ((struct TintedGlassRecord*) obj)->calculatedopacity << 8;
+        } else if ((((PropDefHeaderRecord*)obj)->type == PROPDEF_DOOR) && ((((struct DoorRecord*) obj)->doorFlags & 2) != 0)) {
+            mrData.envcolour.word = ((struct DoorRecord*) obj)->calculatedopacity << 8;
+        } else {
+            mrData.envcolour.word = 0;
+        }
+    }
+
+    temp_v0_4 = objGetShotsTaken(obj);
+    phi_a0 = 0xFF - (temp_v0_4 * 0x15);
+
+    if (phi_a0 < 0) {
+        phi_a0 = 0;
+    }
+
+    sp48.r = (s32) (obj->shadecol.rgba[0] * phi_a0) >> 8;
+    sp48.g = (s32) (obj->shadecol.rgba[1] * phi_a0) >> 8;
+    sp48.b = (s32) (obj->shadecol.rgba[2] * phi_a0) >> 8;
+    sp48.a = obj->shadecol.rgba[3] + temp_v0_4 * 0xF;
+
+    if (sp48.a >= 0x100) {
+        sp48.a = 0xFF;
+    }
+
+    sub_GAME_7F040384(&sp48, spAC, &spB0);
+
+    mrData.fogcolour.word =
+        (sp48.rgba[0] << 0x18) | (sp48.rgba[1] << 0x10) | (sp48.rgba[2] << 0x08) | (sp48.rgba[3] << 0x00);
+
+    sub_GAME_7F04AC20(prop, &mrData, arg2);
+
+    return mrData.gdl;
+}
+
 #endif

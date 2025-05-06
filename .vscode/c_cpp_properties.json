@@ -14,7 +14,8 @@
                 "DF3DEX_GBI",
                 "F3D_OLD",
                 "WIDESCREEN",
-                "VERSION_US"
+                "VERSION_US",
+                "LEFTOVERDEBUG"
             ]
         }
     ],

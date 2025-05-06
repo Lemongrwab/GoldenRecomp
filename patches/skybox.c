@@ -1,8 +1,43 @@
 #include "patches.h"
 #include "gbi_extension.h"
 
-#if 0
+#if 1
+RECOMP_PATCH Gfx *sub_GAME_7F097818(Gfx *gdl, SkyRelated38 *v1, SkyRelated38 *v2, SkyRelated38 *v3, f32 scale, bool textured)
+{
+    u32 width = viGetX();
+    u32 height = viGetY();
+    u32 fill_color = GPACK_RGBA5551(60, 90, 255, 1); // Light blue sky color
 
+    gDPPipeSync(gdl++);
+    gDPSetCycleType(gdl++, G_CYC_FILL);
+    gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, osViGetCurrentFramebuffer());
+    gDPSetFillColor(gdl++, (fill_color << 16) | fill_color);
+    gDPFillRectangle(gdl++, 0, 0, (width - 1) , (height - 1) );
+    gDPPipeSync(gdl++);
+
+    return gdl;
+}
+
+RECOMP_PATCH Gfx *sub_GAME_7F098A2C(Gfx *gdl, SkyRelated38 *arg1, SkyRelated38 *arg2, SkyRelated38 *arg3, SkyRelated38 *arg4, f32 arg5)
+{
+    u32 width = viGetX() ;
+    u32 height = viGetY();
+    u32 fill_color = GPACK_RGBA5551(60, 90, 255, 1); // Light blue sky color
+
+    gDPPipeSync(gdl++);
+    gDPSetCycleType(gdl++, G_CYC_FILL);
+    gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, osViGetCurrentFramebuffer());
+    gDPSetFillColor(gdl++, (fill_color << 16) | fill_color);
+    gDPFillRectangle(gdl++, 0, 0, (width - 1) , (height - 1) );
+    gDPPipeSync(gdl++);
+
+    return gdl;
+}
+#endif
+
+#define PORTSKY 1
+
+#if 0
 RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
     coord3d sp6a4;
     coord3d sp698;
@@ -57,7 +92,7 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
     SkyRelated18 sp43c[5];
     f32 tmp;
     f32 scale;
-    s32 sp430;
+    bool sp430;
     struct CurrentEnvironmentRecord* env;
 
     scale = get_room_data_float1() / 30.0f;
@@ -92,17 +127,13 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
 
     gdl = viSetFillColor(gdl, env->Red, env->Green, env->Blue);
 
-#ifdef PLATFORM_N64
+    if (&sp6a4)
+        ;
+
     sub_GAME_7F093880(0.0f, 0.0f, &sp6a4);
     sub_GAME_7F093880(getPlayer_c_screenwidth() - 0.1f, 0.0f, &sp698);
     sub_GAME_7F093880(0.0f, getPlayer_c_screenheight() - 0.1f, &sp68c);
     sub_GAME_7F093880(getPlayer_c_screenwidth() - 0.1f, getPlayer_c_screenheight() - 0.1f, &sp680);
-#else
-    sub_GAME_7F093880(-4.0f, -4.0f, &sp6a4);
-    sub_GAME_7F093880(getPlayer_c_screenwidth() + 4.0f, -4.0f, &sp698);
-    sub_GAME_7F093880(-4.0f, getPlayer_c_screenheight() + 4.0f, &sp68c);
-    sub_GAME_7F093880(getPlayer_c_screenwidth() + 4.0f, getPlayer_c_screenheight() + 4.0f, &sp680);
-#endif
 
     sp538 = sub_GAME_7F0938FC(&sp6a4, &sp644, &sp58c);
     sp534 = sub_GAME_7F0938FC(&sp698, &sp638, &sp588);
@@ -596,31 +627,32 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
             gDPPipeSync(gdl++);
             gDPSetTexturePersp(gdl++, G_TP_PERSP);
         } else {
-            // *(volatile int*) 0 = 0;
             gDPPipeSync(gdl++);
 
             texSelect(&gdl, &skywaterimages[fogGetCurrentEnvironmentp()->WaterImageId], 1, 0, 2);
             gdl = sub_GAME_7F09343C(gdl, 0); // ???
             gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 
-            // if (s1 == 4) {
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[3], 130.0f, TRUE);
-            //
-            //     if (sp430) {
-            //         sp274[0].unk2c++;
-            //         sp274[1].unk2c++;
-            //         sp274[2].unk2c++;
-            //         sp274[3].unk2c++;
-            //     }
-            //
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[3], &sp274[2], &sp274[0], 130.0f, TRUE);
-            // } else if (s1 == 5) {
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[2], &sp274[3], 130.0f, TRUE);
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[3], &sp274[4], 130.0f, TRUE);
-            // } else if (s1 == 3) {
-            //     gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
-            // }
+#if PORTSKY == 0
+            if (s1 == 4) {
+                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[3], 130.0f, TRUE);
+
+                if (sp430) {
+                    sp274[0].unk2c++;
+                    sp274[1].unk2c++;
+                    sp274[2].unk2c++;
+                    sp274[3].unk2c++;
+                }
+
+                gdl = sub_GAME_7F097818(gdl, &sp274[3], &sp274[2], &sp274[0], 130.0f, TRUE);
+            } else if (s1 == 5) {
+                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
+                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[2], &sp274[3], 130.0f, TRUE);
+                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[3], &sp274[4], 130.0f, TRUE);
+            } else if (s1 == 3) {
+                gdl = sub_GAME_7F097818(gdl, &sp274[0], &sp274[1], &sp274[2], 130.0f, TRUE);
+            }
+#else
             {
                 s32 i;
                 Vtx* verts = dynAllocate7F0BD6C4(s1);
@@ -659,8 +691,9 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                     gDPTri1(gdl++, 0, 1, 2);
                 }
 
-                // gSPPopMatrix(gdl++, G_MTX_MODELVIEW); // <-- Crashes RT64 ?
+                // gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
             }
+#endif
         }
     }
 
@@ -1053,6 +1086,9 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
 
     texSelect(&gdl, &skywaterimages[fogGetCurrentEnvironmentp()->SkyImageId], 1, 0, 2);
 
+    if (1)
+        ;
+
     gDPSetEnvColor(gdl++, fogGetCurrentEnvironmentp()->Red, fogGetCurrentEnvironmentp()->Green,
                    fogGetCurrentEnvironmentp()->Blue, 0xff);
     gDPSetCombineLERP(gdl++, SHADE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, SHADE, SHADE, ENVIRONMENT, TEXEL0,
@@ -1078,7 +1114,7 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                                      (getPlayer_c_screentop() + getPlayer_c_screenheight()) * 4.0f - 1.0f);
         }
 
-#if 0
+#if PORTSKY == 0
         if (s1 == 4) {
             if (((sp538 << 3) | (sp534 << 2) | (sp530 << 1) | sp52c) == 12) {
                 if (sp548 < sp54c) {
@@ -1117,18 +1153,20 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
         } else if (s1 == 3) {
             gdl = sub_GAME_7F097818(gdl, &sp94[0], &sp94[1], &sp94[2], 130.0f, TRUE);
         }
+    }
 #else
         {
             s32 i;
-            Vtx* verts = dynAllocate7F0BD6C4(s1);
+            static Vtx verts[10] = {0};
+            // Col* cols = dynAllocate(s1 * sizeof(Col));
             Mtxf mtx;
-            Mtx* mtx_render = dynAllocateMatrix();
-
+            static Mtx mtx_render[10] = {0};
             matrix_4x4_multiply(camGetWorldToScreenMtxf(), &dword_CODE_bss_80079E98, &mtx);
             matrix_4x4_f32_to_s32(&mtx, mtx_render);
 
             // gSPSetExtraGeometryModeEXT(gdl++, 0x00000100);
             gSPMatrix(gdl++, osVirtualToPhysical(mtx_render), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+            // gSPColor(gdl++, osVirtualToPhysical(cols), s1);
             gSPVertex(gdl++, osVirtualToPhysical(verts), s1, 0);
 
             for (i = 0; i < s1; ++i) {
@@ -1137,6 +1175,7 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
                 verts[i].v.ob[2] = sp4b4[i].unk08;
                 verts[i].v.tc[0] = skyClamp(sp4b4[i].unk0c, -32768.f, 32767.f);
                 verts[i].v.tc[1] = skyClamp(sp4b4[i].unk10, -32768.f, 32767.f);
+                // verts[i].colour = i * 4;
                 verts[i].v.cn[0] = sp4b4[i].r;
                 verts[i].v.cn[1] = sp4b4[i].g;
                 verts[i].v.cn[2] = sp4b4[i].b;
@@ -1152,10 +1191,10 @@ RECOMP_PATCH Gfx* skyRender(Gfx* gdl) __attribute__((optnone)) {
             gDPTri1(gdl++, 0, 1, 2);
         }
 
-        // gSPPopMatrix(gdl++, G_MTX_MODELVIEW); // <-- Crashes RT64 ?
+        // gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
         // gSPClearExtraGeometryModeEXT(gdl++, 0x00000100);
-#endif
     }
+#endif
 
     return gdl;
 }

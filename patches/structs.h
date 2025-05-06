@@ -1,6 +1,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#define inherits struct
+
 #include "patches.h"
 
 #define ROM_MUSIC_START_OFFSET 0x10000U
@@ -9,6 +11,156 @@
 
 #define PROPRECORD_STAN_ROOM_LEN 4
 #define WATCH_NUMBER_SCREENS 5
+
+#define CHROBJ_TIMETOREGEN 60
+#define CHROBJ_TIMETOREGEN_F 60.0f
+#define XINC 6.0f
+#define XDEC 12.0f
+#define XDEC2 6
+#define XDEC3 5.8183274f
+#define INCVAL 0x38E
+#define INTRO_EYE_COUNTER_CASE_4 108
+#define INTRO_EYE_COUNTER_CASE_5_ADD 8
+#define INTRO_EYE_COUNTER_CASE_6 0x1e
+
+#define NUM_VIDEO_FRAME_BUFFERS 2
+#define NUM_VIDEO_SETTINGS NUM_VIDEO_FRAME_BUFFERS
+
+#define WIDESCREEN_ASPECT ((f32) (16.0f / 9.0f))
+
+#define SCREEN_HEIGHT_MIN 240
+#define SCREEN_HEIGHT_240 240
+#define SCREEN_HEIGHT_272 272
+#define SCREEN_HEIGHT_330 330
+#define SCREEN_HEIGHT_MAX 480
+#define SCREEN_HEIGHT_MAX_EU 572
+
+#define SCREEN_WIDTH_MIN 320
+#define SCREEN_WIDTH_320 320
+#define SCREEN_WIDTH_440 440
+#define SCREEN_WIDTH_MAX 640
+
+#define VIEWPORT_WIDTH_FULLSCREEN SCREEN_WIDTH_320
+#define VIEWPORT_WIDTH_WIDESCREEN SCREEN_WIDTH_320
+#define VIEWPORT_WIDTH_CINEMA SCREEN_WIDTH_320
+
+#define SCREEN_HALF_WIDTH (SCREEN_WIDTH_320 / 2)
+
+/* 304 = 320 - 16 ?? */
+#define VIEWPORT_HEIGHT_FULLSCREEN 304
+#define VIEWPORT_HEIGHT_WIDESCREEN 248
+#define VIEWPORT_HEIGHT_CINEMA 190
+
+#define VIEWPORT_HEIGHT_DEFAULT_NTSC 220
+#define VIEWPORT_HEIGHT_DEFAULT_PAL 272
+
+#define VIEWPORT_OFFSET_HEIGHT_WIDESCREEN_NTSC 180
+#define VIEWPORT_OFFSET_HEIGHT_WIDESCREEN_PAL 216
+
+#define VIEWPORT_OFFSET_HEIGHT_CINEMA_NTSC 136
+#define VIEWPORT_OFFSET_HEIGHT_CINEMA_PAL 162
+
+/* 159 = (640 / 4) - 1 */
+#define VIEWPORT_WIDTH_4P 159
+/* 109 = (440 / 4) - 1 */
+#define VIEWPORT_HEIGHT_4P_109 109
+/* PAL */
+#define VIEWPORT_HEIGHT_4P_135 135
+
+#define WIDESCREEN_SCALE_FACTOR_NTSC 40.0f
+#define WIDESCREEN_SCALE_FACTOR_PAL 56.0f
+
+#define CINEMA_SCALE_FACTOR_NTSC 84.0f
+#define CINEMA_SCALE_FACTOR_PAL 110.0f
+
+#define WIDESCREEN_ULY_SCALE_FACTOR_NTSC -20.0f
+#define WIDESCREEN_ULY_SCALE_FACTOR_PAL -29.0f
+
+#define CINEMA_ULY_SCALE_FACTOR_NTSC -42.0f
+#define CINEMA_ULY_SCALE_FACTOR_PAL -52.0f
+
+#define VIEWPORT_ULY_2P_PLAYER_1 10
+
+#define VIEWPORT_ULY_2P_PLAYER_2_NTSC 121
+#define VIEWPORT_ULY_2P_PLAYER_2_PAL 137
+
+#define VIEWPORT_ULY_4P_PLAYER_12 10
+
+#define VIEWPORT_ULY_4P_PLAYER_34_NTSC 121
+#define VIEWPORT_ULY_4P_PLAYER_34_PAL 137
+
+#define VIEWPORT_ULY_CAM_FULLSCREEN 13
+#define VIEWPORT_ULY_CAM_WIDESCREEN 41
+#define VIEWPORT_ULY_CAM_CINEMA 70
+
+#define VIEWPORT_ULY_WIDESCREEN_OFFSET_NTSC 30
+#define VIEWPORT_ULY_WIDESCREEN_OFFSET_PAL 29
+
+#define VIEWPORT_ULY_CINEMA_OFFSET 52
+#define VIEWPORT_ULY_DEFAULT 10
+
+#define Z_BUFFER_HEIGHT_NTSC 120
+#define Z_BUFFER_HEIGHT_PAL 136
+
+#define Z_BUFFER_4_3_HEIGHT 330
+#define Z_BUFFER_4_3_WIDTH 440
+
+// 4:3
+#define ASPECT_RATIO_SD (1.3333334f)
+#define ASPECT_RATIO_PAL (1.1764706f)
+
+#define ASPECT_RATIO_EU_400_330 (1.5873016119f)
+#define ASPECT_RATIO_EU_320_272 (1.40056025982f)
+
+#if defined(VERSION_EU)
+/* PAL */
+#define SCREEN_HEIGHT SCREEN_HEIGHT_272
+#define VIEWPORT_HEIGHT_4P VIEWPORT_HEIGHT_4P_135
+#define WIDESCREEN_SCALE_FACTOR WIDESCREEN_SCALE_FACTOR_PAL
+#define CINEMA_SCALE_FACTOR CINEMA_SCALE_FACTOR_PAL
+#define VIEWPORT_OFFSET_HEIGHT_WIDESCREEN VIEWPORT_OFFSET_HEIGHT_WIDESCREEN_PAL
+#define VIEWPORT_HEIGHT_DEFAULT VIEWPORT_HEIGHT_DEFAULT_PAL
+#define VIEWPORT_OFFSET_HEIGHT_CINEMA VIEWPORT_OFFSET_HEIGHT_CINEMA_PAL
+#define VIEWPORT_ULY_2P_PLAYER_2 VIEWPORT_ULY_2P_PLAYER_2_PAL
+#define WIDESCREEN_ULY_SCALE_FACTOR WIDESCREEN_ULY_SCALE_FACTOR_PAL
+#define CINEMA_ULY_SCALE_FACTOR CINEMA_ULY_SCALE_FACTOR_PAL
+#define VIEWPORT_ULY_4P_PLAYER_34 VIEWPORT_ULY_4P_PLAYER_34_PAL
+#define VIEWPORT_ULY_WIDESCREEN_OFFSET VIEWPORT_ULY_WIDESCREEN_OFFSET_PAL
+#define Z_BUFFER_HEIGHT Z_BUFFER_HEIGHT_PAL
+#define ASPECT_RATIO ASPECT_RATIO_PAL
+#else
+/* NTSC */
+#define SCREEN_HEIGHT SCREEN_HEIGHT_240
+#define VIEWPORT_HEIGHT_4P VIEWPORT_HEIGHT_4P_109
+#define WIDESCREEN_SCALE_FACTOR WIDESCREEN_SCALE_FACTOR_NTSC
+#define CINEMA_SCALE_FACTOR CINEMA_SCALE_FACTOR_NTSC
+#define VIEWPORT_OFFSET_HEIGHT_WIDESCREEN VIEWPORT_OFFSET_HEIGHT_WIDESCREEN_NTSC
+#define VIEWPORT_HEIGHT_DEFAULT VIEWPORT_HEIGHT_DEFAULT_NTSC
+#define VIEWPORT_OFFSET_HEIGHT_CINEMA VIEWPORT_OFFSET_HEIGHT_CINEMA_NTSC
+#define VIEWPORT_ULY_2P_PLAYER_2 VIEWPORT_ULY_2P_PLAYER_2_NTSC
+#define WIDESCREEN_ULY_SCALE_FACTOR WIDESCREEN_ULY_SCALE_FACTOR_NTSC
+#define CINEMA_ULY_SCALE_FACTOR CINEMA_ULY_SCALE_FACTOR_NTSC
+#define VIEWPORT_ULY_4P_PLAYER_34 VIEWPORT_ULY_4P_PLAYER_34_NTSC
+#define VIEWPORT_ULY_WIDESCREEN_OFFSET VIEWPORT_ULY_WIDESCREEN_OFFSET_NTSC
+#define Z_BUFFER_HEIGHT Z_BUFFER_HEIGHT_NTSC
+#define ASPECT_RATIO ASPECT_RATIO_SD
+#endif
+
+#define SCREEN_WIDTH SCREEN_WIDTH_320
+
+#define XSCALE_MAX 0x400
+#define YSCALE_MAX 0x800
+
+#define FOV_Y_F 60.0f
+
+#define GUNSIGHTREASON_1 0x01
+#define GUNSIGHTREASON_NOTAIMING 0x02
+#define GUNSIGHTREASON_NOCONTROL 0x04
+#define GUNSIGHTREASON_DAMAGE 0x10
+
+#define GUNAMMOREASON_OPTION 0x01
+#define GUNAMMOREASON_NOCONTROL 0x02
+#define GUNAMMOREASON_DAMAGE 0x08
 
 typedef enum MUSIC_TRACKS {
     M_NONE,
@@ -76,11 +228,29 @@ typedef enum MUSIC_TRACKS {
     M_END_SOMETHING
 } MUSIC_TRACKS;
 
+typedef enum COLORMODE { COLORMODE_32BIT, COLORMODE_16BIT } COLORMODE;
+
+typedef enum SCREEN_SIZE { SCREEN_SIZE_320x240, SCREEN_SIZE_440x330 } SCREEN_SIZE;
+
 typedef enum SCREEN_SIZE_OPTION {
     SCREEN_SIZE_FULLSCREEN,
     SCREEN_SIZE_WIDESCREEN,
     SCREEN_SIZE_CINEMA
 } SCREEN_SIZE_OPTION;
+
+typedef enum SCREEN_RATIO_OPTION { SCREEN_RATIO_NORMAL, SCREEN_RATIO_16_9 } SCREEN_RATIO_OPTION;
+
+// canonically MD
+typedef enum VIDEOMODE {
+    MD_BLACK,
+    MD_NORMAL,
+    MD_MAXIMUM,
+
+    // just in case someone commits with old name
+    VIDEOMODE_DISABLE_320x240 = MD_BLACK,
+    VIDEOMODE_320x240 = MD_NORMAL,
+    VIDEOMODE_640x480 = MD_MAXIMUM
+} VIDEOMODE;
 
 typedef enum ITEM_IDS {
     ITEM_UNARMED,
@@ -174,6 +344,81 @@ typedef enum ITEM_IDS {
     ITEM_TOKEN,
     ITEM_IDS_MAX
 } ITEM_IDS;
+
+typedef enum PROPDEF_TYPE {
+    PROPDEF_NOTHING,
+    PROPDEF_DOOR,
+    PROPDEF_DOOR_SCALE,
+    PROPDEF_PROP,
+    PROPDEF_KEY,
+    PROPDEF_ALARM,
+    PROPDEF_CCTV,
+    PROPDEF_MAGAZINE,
+    PROPDEF_COLLECTABLE,
+    PROPDEF_GUARD,
+    PROPDEF_MONITOR,
+    PROPDEF_MULTI_MONITOR,
+    PROPDEF_RACK,
+    PROPDEF_AUTOGUN,
+    PROPDEF_LINK,
+    PROPDEF_DEBRIS,
+    PROPDEF_UNK16,
+    PROPDEF_HAT,
+    PROPDEF_GUARD_ATTRIBUTE,
+    PROPDEF_SWITCH,
+    PROPDEF_AMMO,
+    PROPDEF_ARMOUR,
+    PROPDEF_TAG,
+    PROPDEF_OBJECTIVE_START,
+    PROPDEF_OBJECTIVE_END,
+    PROPDEF_OBJECTIVE_DESTROY_OBJECT,
+    PROPDEF_OBJECTIVE_COMPLETE_CONDITION,
+    PROPDEF_OBJECTIVE_FAIL_CONDITION,
+    PROPDEF_OBJECTIVE_COLLECT_OBJECT,
+    PROPDEF_OBJECTIVE_DEPOSIT_OBJECT,
+    PROPDEF_OBJECTIVE_PHOTOGRAPH,
+    PROPDEF_OBJECTIVE_NULL,
+    PROPDEF_OBJECTIVE_ENTER_ROOM,
+    PROPDEF_OBJECTIVE_DEPOSIT_OBJECT_IN_ROOM,
+    PROPDEF_OBJECTIVE_COPY_ITEM,
+    PROPDEF_WATCH_MENU_OBJECTIVE_TEXT,
+    PROPDEF_GAS_RELEASING,
+    PROPDEF_RENAME,
+    PROPDEF_LOCK_DOOR,
+    PROPDEF_VEHICHLE,
+    PROPDEF_AIRCRAFT,
+    PROPDEF_UNK41,
+    PROPDEF_GLASS,
+    PROPDEF_SAFE,
+    PROPDEF_SAFE_ITEM,
+    PROPDEF_TANK,
+    PROPDEF_CAMERAPOS, // canonical name
+    PROPDEF_TINTED_GLASS,
+    PROPDEF_END,
+    PROPDEF_MAX
+} PROPDEF_TYPE;
+
+typedef enum CAMERAMODE {
+    CAMERAMODE_NONE,
+    CAMERAMODE_INTRO,
+    CAMERAMODE_FADESWIRL,
+    CAMERAMODE_SWIRL,
+    CAMERAMODE_FP,
+    CAMERAMODE_DEATH_CAM_SP,
+    CAMERAMODE_DEATH_CAM_MP,
+    CAMERAMODE_POSEND,
+    CAMERAMODE_FP_NOINPUT,
+    CAMERAMODE_MP,
+    CAMERAMODE_FADE_TO_TITLE,
+    CAMERAMODE_COUNT
+} CAMERAMODE;
+
+typedef enum GAMEMODE { GAMEMODE_INTRO = -1, GAMEMODE_SOLO, GAMEMODE_MULTI, GAMEMODE_CHEATS } GAMEMODE;
+
+typedef enum GUNHAND // Canonical name
+{ GUNRIGHT,
+  GUNLEFT,
+  GUNHANDS } GUNHAND;
 
 typedef struct CurrentEnvironmentRecord {
     s32 DifferenceFromFarIntensity;
@@ -747,8 +992,25 @@ typedef struct ChrRecord_f180 {
     f32 unk28;
 } ChrRecord_f180;
 
+typedef struct PropDefHeaderRecord {
+    u16 extrascale; /*0x0 Fixed-Point format u8.8 eg: 0x03.80 = 3.5*/
+    /*
+      Destroyed, respawn, defused etc
+        8x    destroyed
+        4x    datathief/defuser/decoder used on obj (activated?)
+        2x
+        1x
+        x8    external allocated collision block present
+        x4    respawn enabled
+        x2
+        x1    damaged
+    */
+    u8 state;
+    u8 type; /*0x3*/
+} PropDefHeaderRecord;
+
 typedef struct ObjectRecord {
-    struct PropDefHeaderRecord;
+    struct PropDefHeaderRecord wtf;
     s16 obj; // canonical name, use with PROP_ enum eg PROP_ALARM1
     /* ID 0x6
         0000+ or 2710+ (10,000+) to use standard presets.
@@ -1307,8 +1569,7 @@ struct player {
 
     /**
      * Varies from 0.0f to -100.0f
-     * /
-    /* 0x00a0 */
+     */
     f32 ducking_height_offset;
 
     /**
@@ -3157,6 +3418,374 @@ struct player {
     s32 field_2A74;
     s32 field_2A78;
     s32 field_2A7C;
+};
+
+typedef struct ModelRenderData {
+    Mtxf* unk_matrix;   /*0x00 */
+    u32 zbufferenabled; /*0x04*/
+    u32 flags;          /*0x08*/
+    Gfx* gdl;           /*0x0c*/
+
+    Mtxf* mtxlist; /*0x10 */
+    u32 unk14;     /*0x14*/
+    u32 unk18;     /*0x18*/
+    u32 unk1c;     /*0x1c*/
+
+    u32 unk20; /*0x20*/
+    u32 unk24; /*0x24*/
+    u32 unk28; /*0x28*/
+    u32 unk2c; /*0x2c*/
+
+    s32 PropType;      /*0x30*/
+    rgba_u8 envcolour; /*0x34*/
+    rgba_u8 fogcolour; /*0x38*/
+    u32 cullmode;      /*0x3c*/
+} ModelRenderData;
+
+typedef struct rgba_f32 {
+    union {
+        struct {
+            f32 r;
+            f32 g;
+            f32 b;
+            f32 a;
+        };
+        f32 rgba[4];
+    };
+} rgba_f32;
+
+typedef struct rgba_s32 {
+    union {
+        struct {
+            s32 r;
+            s32 g;
+            s32 b;
+            s32 a;
+        };
+        s32 rgba[4];
+    };
+} rgba_s32;
+
+typedef struct view4f {
+    union {
+        struct {
+            f32 left;
+            f32 top;
+            f32 width;
+            f32 height;
+        };
+        s32 v[4];
+        f32 f[4];
+    };
+} view4f;
+
+typedef struct bbox2d {
+    union {
+        struct {
+            coord2d min;
+            coord2d max;
+        };
+        f32 f[2][2];
+    };
+} bbox2d;
+
+typedef struct bbox {
+    float xmin;
+    float xmax;
+    float ymin;
+    float ymax;
+    float zmin;
+    float zmax;
+} bbox;
+
+typedef struct ModelRoData_BoundingBoxRecord {
+    u32 ModelNumber;    /*0x0*/
+    struct bbox Bounds; /*0x4*/
+} ModelRoData_BoundingBoxRecord;
+
+typedef struct Vertex {
+    coord16 coord;
+    s16 index; /*0x6 Collisions Only - points to vertex*/
+    union {
+        struct {
+            s16 s; /*0x8*/
+            s16 t; /*0xa*/
+        };
+        struct Vertex* LinkedTo;
+    };
+    union {
+        u8 r; /*0xc*/
+        u8 nx;
+    };
+    union {
+        u8 g; /*0xd*/
+        u8 ny;
+    };
+    union {
+        u8 b; /*0xe*/
+        u8 nz;
+    };
+    u8 a; /*0xf*/
+} Vertex;
+
+typedef struct DoorRecord {
+    struct ObjectRecord wtf;
+    /* GE Door maybe different to PD?
+    80:	linked with other doors (4 bytes)
+        if used, uses # objects up/down to other door.
+        when this object activates, targetted object also activates
+        you usually want both doors to point at each other, obviously
+    84:	distance door travels when opening/closing (total%)
+    88:	distance before door loses collisions (total%)
+    00150000 -> 41a80000
+    8C:	open/close accelleration rate
+    90:	rate used when someone activates a door as it opens/closes
+    0100 -> 3B800000
+    94:	open/close max speed
+    1999 -> 3DCCC800
+    note:	*speed sets the speed the door opens at.
+        the two rate features affect how long it takes to reach this max speed.
+    98:	open technique (2+2 bytes)
+        0000 0000	slider (left/right) clears the door away as it slides, stopping visual problems when opening
+    into a wall 0004 0000	slider (left/right) 0000 0004	shutter (up/down) clears the door as it slides 0004 0004
+    shutter (up/down) 0000 0005	special (swinging) defined here 0000 0006	special (eye) defined here in block 0000
+    0007	special (iris) defined here 9F:	nonzero to lock A0:	amount of ms door remains open A7:	opening
+    sound effect A8:	runtime - (float) AC:	runtime - (float) B0:	runtime - (float) B4:	runtime - (float)
+    current distance travelled B8:	runtime - (float) BC:	runtime - BD:	runtime - C8:	runtime - CC:	runtime
+    - p->vertex buffer when door does not clear F0:	runtime - F4:	runtime - F8:	runtime -
+    */
+
+    s32 linkedDoorOffset; /*0x80*/
+
+    /**
+     * Distance door travels when opening/closing (total%).
+     * Offset 0x84.
+     */
+    f32 maxFrac;
+
+    /**
+     * Distance before door loses collisions (total%) (vertical height % until Bond can walk through).
+     * Offset 0x88.
+     */
+    f32 perimFrac;
+
+    /**
+     * Start moving acceleration rate (when a door is first opened/closed).
+     * Offset 0x8c.
+     */
+    f32 accel;
+
+    /**
+     * Start slowing down acceleration rate (when a door is almost entirely opened/closed).
+     * Offset 0x90.
+     */
+    f32 decel;
+
+    /**
+     * Maximum speed door can move on each update.
+     * Offset 0x94.
+     */
+    f32 maxSpeed;
+
+    /**
+     * open technique (2+2 bytes).
+     *
+     *  0000 0000	slider (left/right) clears the door away as it slides, stopping visual problems when opening
+     * into a wall 0004 0000	slider (left/right) 0000 0004	shutter (up/down) clears the door as it slides 0004 0004
+     * shutter (up/down) 0000 0005	special (swinging) defined here 0000 0006	special (eye) defined here in
+     * block 0000 0007	special (iris) defined here
+     *
+     * Offset 0x98.
+     */
+    u16 doorFlags;
+
+    /**
+     * See doorFlags.
+     * Offset 0x9a.
+     */
+    u16 doorType;
+
+    /**
+     * nonzero to lock.
+     * Offset 0x9c.
+     */
+    u32 keyflags;
+
+    /**
+     * Number of frames the door remains open before closing.
+     * Offset 0xa0.
+     */
+    u32 autoCloseFrames;
+
+    /**
+     * Sound effect played when the door is opened.
+     * (Actually sets the initial open, continued opening, and final open sounds).
+     * Offset 0xa4.
+     */
+    u32 doorOpenSound;
+
+    /**
+     * Max fraction open, aka max displacement.
+     * Offset 0xa8.
+     */
+    f32 frac;
+
+    f32 unkac; /*0xac*/
+    f32 unkb0; /*0xb0*/
+
+    /**
+     * Current distance travelled, aka displacement percent.
+     * Offset 0xb4.
+     */
+    f32 openPosition;
+
+    /**
+     * Current speed of the door as it is opening or closing.
+     * Offset 0xb8.
+     */
+    f32 speed;
+
+    /**
+     * Current open/close/other state of the door.
+     * States are defined in enum DOORSTATE, but asm expects a single byte.
+     * Offset 0xbc.
+     */
+    s8 openstate;
+
+    u8 unkbd; /*0xbd*/
+
+    // something related to rendering
+    s16 calculatedopacity; /*0xbe*/
+    s32 TintDist;          /*0xc0*/
+    s16 CullDist;          /*0xc4*/
+    s8 soundType;          /*0xc6*/
+    s8 fadeTime60;         /*0xc7*/
+
+    /**
+     * Connected door. Opening/closing this door will also open the linkedDoor.
+     * Offset 0xc8.
+     */
+    struct DoorRecord* linkedDoor;
+
+    Vertex* unkcc; /*0xcc*/
+
+    struct ModelRoData_BoundingBoxRecord bbox;
+
+    /**
+     * When the door completely opens, the current global timer value is
+     * copied into this property. Once autoCloseFrames have elapsed
+     * (once the difference between the timer and this value has exceeded autoCloseFrames)
+     * the door will start closing.
+     * Offset 0xec.
+     */
+    u32 openedTime;
+
+    /**
+     * Portal number.
+     * Offset 0xf0.
+     */
+    s32 portalNumber;
+
+    /**
+     * Unknown. Changes at runtime. Appears to be set to a pointer
+     * while the door is moving, then cleared when the door is stationary.
+     * If you reset this to 0 (NULL pointer), then the door opening
+     * sound never stops playing.
+     */
+    ALSoundState* openSoundState;
+
+    ALSoundState* closeSoundState;
+
+    /**
+     * Copy of global timer value.
+     *
+     * For each sibling, the original frac is backed up into the sibling's
+     * lastcalc60 field. The desired frac is then calculated and set in the
+     * sibling's frac property. Then collision checks are done, and the original
+     * frac is restored if any sibling is blocked.
+     * Offset 0xfc.
+     */
+    union {
+        s32 lastcalc60i;
+        f32 lastcalc60f;
+    };
+} DoorRecord;
+
+typedef struct TintedGlassRecord {
+    struct ObjectRecord WTF;
+    s32 TintDist;
+    s32 CullDist;
+    s32 calculatedopacity;
+    s32 portalnum;
+    f32 unk90;
+} TintedGlassRecord;
+
+struct player_data {
+    /* 0x0 */
+    s32 shot_count[7];
+
+    /* 0x1c */
+    int kill_count;
+
+    /* 0x20 */
+    int killed_gg_owner_count;
+
+    /* 0x24 */
+    int kill_counts[4];
+
+    /* 0x34 */
+    int time_other_players_on_screen;
+
+    /* 0x38 */
+    float distance_traveled;
+
+    /* 0x3c */
+    int damage_to_backside;
+
+    /* 0x40 */
+    float body_armor_pickups;
+
+    /* 0x44 */
+    int min_time_between_kills;
+
+    /* 0x48 */
+    int max_time_between_kills;
+
+    /* 0x4c */
+    int longest_inning;
+
+    /* 0x50 */
+    s32 shortest_inning;
+
+    /* 0x54 */
+    int most_killed_one_life;
+
+    /* 0x58 */
+    int most_killed_one_time;
+
+    /* 0x5c */
+    float handicap;
+
+    /* 0x60 */
+    int flag_counter;
+
+    /* 0x64 */
+    float player_perspective_height;
+
+    /* 0x68 */
+    u8 order_out_in_yolt;
+
+    /* 0x69 */
+    u8 have_token_or_goldengun;
+
+    /* 0x6a */
+    u8 autoaim;
+
+    /* 0x6b */
+    u8 sight;
+
+    /* 0x6c */
+    int killed_civilians;
 };
 
 #endif

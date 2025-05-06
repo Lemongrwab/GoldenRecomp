@@ -32,6 +32,7 @@
 #define GFX_POOL_SIZE 6400
 
 #include "PR/ultratypes.h"
+typedef s32 bool;
 #include "PR/R4300.h"
 #include "PR/os.h"
 #include "rt64_extended_gbi.h"

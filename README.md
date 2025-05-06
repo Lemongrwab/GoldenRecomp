@@ -16,7 +16,7 @@ or just use the included binaries in this repo (Windows only atm)
 ```bash
 .\N64Recomp.exe us.toml
 .\N64Recomp.exe us.toml --dump-context
-.\RSPRecomp.exe aspMain.toml
+.\RSPRecomp.exe aspMain.us.toml
 ```
 
 * Open the project folder with visual studio

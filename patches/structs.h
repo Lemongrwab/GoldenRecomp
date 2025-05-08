@@ -5,6 +5,16 @@
 
 #include "patches.h"
 
+#define OS_SC_STACKSIZE 0x2000
+
+#define OS_SC_RETRACE_MSG 1
+#define OS_SC_DONE_MSG 2
+#define OS_SC_RDP_DONE_MSG 3
+#define OS_SC_RSP_MSG 4 // custom - tells audiomgr it's time to do an audio frame
+#define OS_SC_PRE_NMI_MSG 5
+#define OS_SC_LAST_MSG 5 /* this should have highest number */
+#define OS_SC_MAX_MESGS 8
+
 #define ROM_MUSIC_START_OFFSET 0x10000U
 #define NUM_MUSIC_TRACKS 63
 #define ALIGN16_a(val) (((val) + 0xf | 0xf) ^ 0xf)
@@ -252,6 +262,30 @@ typedef enum VIDEOMODE {
     VIDEOMODE_640x480 = MD_MAXIMUM
 } VIDEOMODE;
 
+typedef enum LEVEL_SOLO_SEQUENCE {
+    SP_LEVEL_DAM,
+    SP_LEVEL_FACILITY,
+    SP_LEVEL_RUNWAY,
+    SP_LEVEL_SURFACE1,
+    SP_LEVEL_BUNKER1,
+    SP_LEVEL_SILO, // 5
+    SP_LEVEL_FRIGATE,
+    SP_LEVEL_SURFACE2,
+    SP_LEVEL_BUNKER2,
+    SP_LEVEL_STATUE,
+    SP_LEVEL_ARCHIVES, // 10
+    SP_LEVEL_STREETS,
+    SP_LEVEL_DEPOT,
+    SP_LEVEL_TRAIN,
+    SP_LEVEL_JUNGLE,
+    SP_LEVEL_CONTROL, // 15
+    SP_LEVEL_CAVERNS,
+    SP_LEVEL_CRADLE,
+    SP_LEVEL_AZTEC,
+    SP_LEVEL_EGYPT, // 19
+    SP_LEVEL_MAX    // 20
+} LEVEL_SOLO_SEQUENCE;
+
 typedef enum ITEM_IDS {
     ITEM_UNARMED,
     ITEM_FIST,
@@ -345,6 +379,8 @@ typedef enum ITEM_IDS {
     ITEM_IDS_MAX
 } ITEM_IDS;
 
+typedef enum PLAYER_ID { PLAYER_1, PLAYER_2, PLAYER_3, PLAYER_4 } PLAYER_ID;
+
 typedef enum PROPDEF_TYPE {
     PROPDEF_NOTHING,
     PROPDEF_DOOR,
@@ -419,6 +455,385 @@ typedef enum GUNHAND // Canonical name
 { GUNRIGHT,
   GUNLEFT,
   GUNHANDS } GUNHAND;
+
+typedef enum DIFFICULTY {
+    DIFFICULTY_MULTI = -1,
+    DIFFICULTY_AGENT,
+    DIFFICULTY_SECRET,
+    DIFFICULTY_00,
+    DIFFICULTY_007,
+    DIFFICULTY_MAX
+} DIFFICULTY;
+
+enum MEMPOOL {
+    MEMPOOL_TOTAL, // the mempool starts at _bssSegmentEnd and ends at _stacksSegmentStart
+    MEMPOOL_MF,
+    MEMPOOL_2,
+    MEMPOOL_ML,
+    MEMPOOL_STAGE,
+    MEMPOOL_ME,
+    MEMPOOL_PERMANENT,
+    MEMPOOL_COUNT
+};
+
+typedef enum MENU {
+    MENU_INVALID = -1,
+    MENU_LEGAL_SCREEN,
+    MENU_NINTENDO_LOGO,
+    MENU_RAREWARE_LOGO,
+    MENU_EYE_INTRO,
+    MENU_GOLDENEYE_LOGO,
+    MENU_FILE_SELECT,
+    MENU_MODE_SELECT,
+    MENU_MISSION_SELECT,
+    MENU_DIFFICULTY,
+    MENU_007_OPTIONS,
+    MENU_BRIEFING,
+    MENU_RUN_STAGE,
+    MENU_MISSION_FAILED,
+    MENU_MISSION_COMPLETE,
+    MENU_MP_OPTIONS,
+    MENU_MP_CHAR_SELECT,
+    MENU_MP_HANDICAP,
+    MENU_MP_CONTROL_STYLE,
+    MENU_MP_STAGE_SELECT,
+    MENU_MP_SCENARIO_SELECT,
+    MENU_MP_TEAMS,
+    MENU_CHEAT,
+    MENU_NO_CONTROLLERS,
+    MENU_SWITCH_SCREENS,
+    MENU_DISPLAY_CAST,
+    MENU_SPECTRUM_EMU,
+    MENU_MAX
+} MENU;
+
+typedef enum SFX_ID {
+    NOTHING_SFX,
+    ROCKET_LAUNCH_SFX,
+    GLASS_SHATTERING_SFX,
+    KNIFE_HIT_WALL_SFX,
+    GRENADE_THROW_SFX, // Grenade/Mine or in fact Any object thrown.
+    GRENADE_THROW_QUIET_SFX,
+    GRENADE_THROW_FAINT_SFX,
+    TRAIN_SLIDE_DOOR_SLIDE_SFX, // Ding used on elevator
+    TRAIN_RAILS_SFX,
+    TRAIN_RAILS2_SFX,
+    WATCH_INTERFERENCE_SFX,
+    GUN_TANK2BIG_1_SFX,    // Used for Tank rounds
+    GUN_TANK2BIGBIG_1_SFX, // used for Grenade Launcher
+    GET_HIT_GIRL1_SFX,
+    GET_HIT_GIRL2_SFX,
+    GET_HIT_GIRL3_SFX,
+    BEEP_SFX,
+    BEEP_QUIET_SFX,
+    OPTION_CLICK2_SFX,
+    RICO_12_GBU_A_SFX,
+    RICO_12_GBU_B_SFX,
+    RICO_12_GBU_C_SFX,
+    RICO_12_GBU_D_SFX,
+    RICO_6_TAJ_A_SFX,
+    RICO_6_TAJ_B_SFX,
+    RICO_6_TAJ_C_SFX,
+    RICO_6_TAJ_D_SFX,
+    RICO_8_AFDM_A_SFX,
+    RICO_8_AFDM_B_SFX,
+    RICO_8_AFDM_C_SFX,
+    RICO_8_AFDM_D_SFX,
+    RICO_4_A_SFX,
+    RICO_4_B_SFX,
+    RICO_4_C_SFX,
+    RICO_4_D_SFX,
+    RICO_5_A_SFX,
+    RICO_5_B_SFX,
+    RICO_5_C_SFX,
+    RICO_5_D_SFX,
+    RICO_6_HBBA_A_SFX,
+    RICO_6_HBBA_B_SFX,
+    RICO_6_HBBA_C_SFX,
+    RICO_6_HBBA_D_SFX,
+    OPTION_CHOOSE_SFX,
+    UNKNOWN1_SFX,
+    DROP_GUN_SFX,
+    GUN_SILPPK_A_SFX,
+    PUNCH1_SFX,
+    PUNCH2_SFX,
+    PUNCH3_SFX,
+    GUN_RIFLECOCK_SFX,
+    TRAIN_CLUTTER3_SFX,
+    TRAIN_CLUTTER3B_SFX,
+    TRAIN_CLUTTER3C_SFX,
+    EVIL_LAUGH_SFX,
+    EVIL_LAUGH_QUIET_SFX,
+    EVIL_LAUGH_FAINT_SFX,
+    EVIL_LAUGH_HUSH_SFX,
+    HELI_RUN_SFX,
+    HELI_FLY_SFX,
+    ENGINE_ROOM_SFX,
+    TRAIN_STOP_STILL_SFX,
+    TANK_SFX,
+    TRAIN_STOP_SFX,
+    TRAIN_GO_SFX,
+    TRUCK_RUN_SFX,
+    TRUCK_START_SFX,
+    TRUCK_ENGINE_SFX,
+    BOND_GET_HIT1_SFX,
+    HIT_BULLET_FLESH_SFX,
+    HIT_BULLET_GLASS_SFX,
+    HIT_GLASS_SMASH_SFX,
+    HIT_BULLET_METAL_A_SFX,
+    HIT_BULLET_METAL_B_SFX,
+    HIT_BULLET_SNOW_SFX, // Also used for knife hit
+    HIT_BULLET_WOOD_SFX,
+    HIT_BULLET_WATER_SFX,
+    PAPER_TURN_SFX,
+    PAPER_TURN_2_SFX,
+    COPY_FILE_SFX,
+    RADIO_MESSAGE_SFX,
+    ARMOUR_COLLECT_SFX,
+    OBJ_REGEN_SFX,
+    DOOR_DECODER_SFX,
+    GIRL_GET_HIT1_SFX,
+    CONSOLE_OFF_SFX,
+    CONSOLE_OFF2_SFX,
+    CONSOLE_ON2_SFX,
+    CONSOLE_ON3_SFX,
+    EMPTY_GUN_FIRE_SFX,
+    SHELL_CASE_SFX,
+    RICO_LASER1_SFX,
+    RICO_LASER2_SFX,
+    RICO_LASER3_SFX,
+    RADIO_SFX,
+    KNIFE_THROW1_SFX,
+    KNIFE_THROW2_SFX,
+    KNIFE_THROW3_SFX,
+    COUGH_SFX,
+    COUGH2_SFX,
+    GUN_TASER_SFX,
+    GUN_TASER_LOOP_SFX,
+    GAS_HISS_SFX,
+    UNKNOWN2_SFX,
+    UNKNOWN3_SFX,
+    PUNCHING_AIR_SFX,
+    GUN_B1_MGUN3_3_SFX, // Used for Skorpion (Klobb)
+    GUN_B2_HEAVY_SFX,   // Used for PPK
+    GUN_UNKNOWN_SFX,
+    GUN_B4_BOLTACTION_SFX, // used for AK47
+    GUN_B5_WINC44_SFX,
+    GUN_RIFLE7BIG_1_SFX, // used for Rugar
+    GUN_B8_ANOTHER_SFX,  // used for TT33
+    GUN_B9_CANNON_SFX,   // used for M16
+    GUN_GRENADE_LAUNCHER_SFX,
+    GUN_UNKNOWN2_SFX,
+    GUN_B12_FULLAMRIFLE_SFX, // used for Auto Shotgun
+    GUN_B13_M60AMMGUN_SFX,   // used for Golden Gun
+    GUN_M60AMMGUN_3_SFX,
+    GUN_UNKNOWN3_SFX,
+    HIT_METAL_OBJECT1_SFX,
+    GUN_B17_RIFLE_SFX, // used for Shotgun
+    CART_SPENT_SFX,
+    BODY_FALL_C1_SFX,
+    BODY_FALL_C2_SFX,
+    BODY_FALL_C3_SFX,
+    BODY_FALL_D1_SFX,
+    BODY_FALL_D2_SFX,
+    BODY_FALL_D3_SFX,
+    BODY_FALL_D4_SFX,
+    BODY_FALL_E1_SFX,
+    BODY_FALL_E2_SFX,
+    BODY_FALL_E3_SFX,
+    BODY_ROLLOVER_SFX,
+    GET_HIT_MALE0_SFX,
+    GET_HIT_MALE1_SFX,
+    GET_HIT_MALE2_SFX,
+    GET_HIT_MALE3_SFX,
+    GET_HIT_MALE4_SFX,
+    GET_HIT_MALE5_SFX,
+    GET_HIT_MALE6_SFX,
+    GET_HIT_MALE7_SFX,
+    GET_HIT_MALE8_SFX,
+    GET_HIT_MALE9_SFX,
+    GET_HIT_MALE10_SFX,
+    GET_HIT_MALE11_SFX,
+    GET_HIT_MALE12_SFX,
+    GET_HIT_MALE13_SFX,
+    GET_HIT_MALE14_SFX,
+    GET_HIT_MALE15_SFX,
+    GET_HIT_MALE16_SFX,
+    GET_HIT_MALE17_SFX,
+    GET_HIT_MALE18_SFX,
+    GET_HIT_MALE19_SFX,
+    GET_HIT_MALE20_SFX,
+    GET_HIT_MALE21_SFX,
+    GET_HIT_MALE22_SFX,
+    GET_HIT_MALE23_SFX,
+    GET_HIT_MALE24_SFX,
+    CAMERA_BEEP1_SFX, // Used for Watch Beeping
+    BING_SFX,
+    ALARM1_SFX,
+    ALARM2_SFX,
+    ALARM3_SFX,
+    RICO_EAR_WHISTLE1_SFX,
+    RICO_EAR_WHISTLE2_SFX,
+    RICO_EAR_WHISTLE3_SFX,
+    RICO_EAR_WHISTLE4_SFX,
+    RICO_EAR_WHISTLE5_SFX,
+    EXPLOSION_2A_SFX,
+    EXPLOSION_2B_SFX,
+    EXPLOSION_3_SFX,
+    EXPLOSION_4A_SFX,
+    EXPLOSION_4B_SFX,
+    EXPLOSION_5A_SFX,
+    EXPLOSION_5B_SFX,
+    EXPLOSION_5C_SFX,
+    EXPLOSION_6_SFX,
+    EXPLOSION_7_SFX,
+    EXPLOSION_8_SFX,
+    EXPLOSION_9_SFX,
+    EXPLOSION_1B_SFX,
+    EXPLOSION_1C_SFX,
+    CRUSHED_YELL_SFX,
+    KEY_SEQUENCE_SFX,
+    HIT_BULLET_DIRT2_SFX,
+    ALARM_SWITCH_SFX,
+    DOOR_WOOD_CLOSE_SFX,
+    DOOR_WOOD_OPEN_SFX,
+    ATOMIC_BOMB_SFX,
+    KEY_ANALYSER2_SFX,
+    DOOR_WOOD_SLIDE_SFX,
+    TRAIN_SLIDE_DOOR_CATCH_SFX,
+    GAS_LEAK_SFX,
+    DOOR_SHUTTER_OPEN_SFX,
+    DOOR_SHUTTER_CLOSE_SFX,
+    DOOR_METAL_OPEN_SFX,
+    DOOR_METAL_CLOSE_SFX,
+    CONSOLE_ON_SFX,
+    DOOR_METAL_CLOSE2_SFX,
+    DOOR_METAL_OPEN3_SFX,
+    DOOR_METAL_CLOSE3_SFX,
+    METAL_SLIDE_OPEN_SFX,
+    METAL_SLIDE_CLOSE_SFX,
+    METAL_SLIDE_LOOP_SFX,
+    UNKNOWN4_SFX,
+    UNKNOWN5_SFX,
+    UNKNOWN6_SFX,
+    HIT_BULLET_STONE1_SFX,
+    HIT_BULLET_STONE2_SFX,
+    DOOR_SMART_CATCH1_SFX,
+    DOOR_SMART_SLIDE1_SFX,
+    HIT_BULLET_TILE_SFX,
+    TANK_CRUSH_MAN_SFX,
+    HEAVY_SLIDE_OPEN_SFX,
+    HEAVY_SLIDE_CLOSE_SFX,
+    HEAVY_SINGLE_LOOP_SFX,
+    HIT_BULLET_WOOD2_SFX,
+    DOOR_HYDRAL_CLOSE_SFX, // Main Hydrolic Door loop
+    DOOR_HYDRAL_OPEN_SFX,  // Hudrolic Door Stop sound
+    HIT_BULLET_DIRT1_SFX,
+    HIT_METAL_OBJECT2_SFX,
+    DOOR_LOCK_SFX, // Also used for button Presses
+    TRAIN_CLUTTER2_SFX,
+    HIT_BULLET_MUD3_SFX,
+    DOOR_SLIDE_STONE_OPEN_SFX,  // Main Stone Door Loop
+    DOOR_SLIDE_STONE_CLOSE_SFX, // Stone Door Stop
+    DATA_DOWNLOAD_SFX,
+    LASER_GUN_SFX,
+    KEYCARD_SFX,
+    HIT_BULLET_MUD2_SFX,
+    HIT_BULLET_MUD1_SFX,
+    PICKUP_GUN_SFX,
+    PICKUP_KNIFE_SFX,
+    PICKUP_AMMO_SFX,
+    PICKUP_MINE_SFX,
+    WATCH_STATIC_SFX,
+    WATCH_ON_SFX,
+    WATCH_OFF_SFX,
+    HIT_BULLET_METAL_A3_SFX,
+    HIT_BULLET_METAL_A4_SFX,
+    ATTACH_MINE_SFX,
+    PICKUP_LASER_SFX,
+    WATCH_DETONATE_MINE_SFX, // Watch Trigger
+    CAMERA_CLICK_SFX,        // Camera Shutter
+    KEY_ANALYSER_SFX,
+    MAGNETIC_HUM_SFX,
+    BOMB_DEFUSE_SFX,
+    BI_PLANE_SFX,
+    TRAIN_CLUTTER_SFX,
+    TRAIN_CLUTTERB_SFX,
+    TRAIN_CLUTTERC_SFX,
+    TRAIN_CLUTTERD_SFX,
+    GUN_B9_CANNON_SHORT_SFX,
+    UNKNOWN_QUIET_SFX,
+    CAMERA_ZOOM_LOOP_SFX,
+    CAMERA_ZOOM_STOP_SFX,
+    SNEEZE_SFX,
+    RARELOGO_SFX,
+    RARELOGO_QUIET_SFX,
+    RARELOGO_FAINT_SFX,
+    BIG_CLANK_SFX
+} SFX_ID;
+
+typedef enum ENVIRONMENTDATA_IDS {
+    ENVIRONMENTDATA_PLAYERS_1,
+    ENVIRONMENTDATA_ALT = 100,
+    ENVIRONMENTDATA_PLAYERS_2 = 200,
+    ENVIRONMENTDATA_PLAYERS_3 = 300,
+    ENVIRONMENTDATA_PLAYERS_4 = 400,
+    ENVIRONMENTDATA_CINEMA = 900
+
+} ENVIRONMENTDATA_IDS;
+
+typedef enum LEVELID { // skyID since only used by Sky and does not reflect levelID, rather in past
+                       // SkyID has been confused with Sky[Index].
+    LEVELID_NONE = -1,
+    LEVELID_DEFAULT,
+
+    LEVELID_BUNKER1 = 9,
+
+    LEVELID_SILO = 20,
+
+    LEVELID_STATUE = 22,
+    LEVELID_CONTROL,
+    LEVELID_ARCHIVES,
+    LEVELID_TRAIN,
+    LEVELID_FRIGATE,
+    LEVELID_BUNKER2,
+    LEVELID_AZTEC,
+    LEVELID_STREETS,
+    LEVELID_DEPOT,
+    LEVELID_COMPLEX,
+    LEVELID_EGYPT,
+    LEVELID_DAM,
+    LEVELID_FACILITY,
+    LEVELID_RUNWAY,
+    LEVELID_SURFACE,
+    LEVELID_JUNGLE,
+    LEVELID_TEMPLE,
+    LEVELID_CAVERNS,
+    LEVELID_CITADEL,
+    LEVELID_CRADLE,
+    LEVELID_SHO,
+    LEVELID_SURFACE2,
+    LEVELID_ELD,
+    LEVELID_BASEMENT,
+    LEVELID_STACK,
+    LEVELID_LUE,
+    LEVELID_LIBRARY,
+    LEVELID_RIT,
+    LEVELID_CAVES,
+    LEVELID_EAR,
+    LEVELID_LEE,
+    LEVELID_LIP,
+    LEVELID_CUBA,
+    LEVELID_WAX,
+    LEVELID_PAM,
+    LEVELID_MAX,
+    LEVELID_TITLE = 90,
+    LEVELID_BUNKER2_MP = LEVELID_BUNKER2 + ENVIRONMENTDATA_PLAYERS_4,
+    LEVELID_ARCHIVES_MP = LEVELID_ARCHIVES + ENVIRONMENTDATA_PLAYERS_4,
+    LEVELID_CAVERNS_MP = LEVELID_CAVERNS + ENVIRONMENTDATA_PLAYERS_4,
+    LEVELID_FACILITY_MP = LEVELID_FACILITY + ENVIRONMENTDATA_PLAYERS_4,
+    LEVELID_EGYPT_MP = LEVELID_EGYPT + ENVIRONMENTDATA_PLAYERS_4
+} LEVELID;
 
 typedef struct CurrentEnvironmentRecord {
     s32 DifferenceFromFarIntensity;
@@ -3786,6 +4201,81 @@ struct player_data {
 
     /* 0x6c */
     int killed_civilians;
+};
+
+typedef struct {
+    short type;
+    char misc[30];
+} OSScMsg;
+
+typedef union {
+
+    struct {
+        short type;
+    } gen;
+
+    struct {
+        short type;
+    } done;
+
+    OSScMsg app;
+
+} GFXMsg;
+
+struct memallocstring {
+    s32 id;
+    void* string;
+};
+
+struct rectbbox {
+    f32 left;
+    f32 up;
+    f32 right;
+    f32 down;
+};
+
+typedef struct save_data {
+    s32 chksum1;
+    s32 chksum2;
+    u8 completion_bitflags;
+    u8 flag_007;
+    u8 music_vol;
+    u8 sfx_vol;
+    u16 options;
+    u8 unlocked_cheats_1;
+    u8 unlocked_cheats_2;
+    u8 unlocked_cheats_3;
+    char padding;
+    u8 times[(SP_LEVEL_MAX - 1) * 4];
+} save_data;
+
+typedef struct ramromfilestructure {
+    u64 randomseed;
+    u64 randomizer;
+    enum LEVELID stagenum;
+    enum DIFFICULTY difficulty;
+    u32 size_cmds;
+    save_data savefile;
+    s32 totaltime_ms;
+    s32 filesize;
+    enum GAMEMODE mode;
+    u32 slotnum;
+    u32 numplayers;
+    u32 scenario;
+    u32 mpstage_sel;
+    u32 gamelength;
+    u32 mp_weapon_set;
+    u32 mp_char[4];
+    u32 mp_handi[4];
+    u32 mp_contstyle[4];
+    u32 aim_option;
+    u32 mp_flags[4];
+
+} ramromfilestructure;
+
+struct ramrom_struct {
+    ramromfilestructure* fdata;
+    s32 locked;
 };
 
 #endif

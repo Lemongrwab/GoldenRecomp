@@ -41,6 +41,7 @@ typedef s32 bool;
 // #include "PR/os_thread.h"
 // #include "PR/os_message.h"
 // #include "PR/os_pi.h"
+#include "os_extension.h"
 #include "structs.h"
 #include "externs.h"
 #include "misc_funcs.h"

@@ -1038,7 +1038,7 @@ RECOMP_PATCH void interface_menu05_fileselect(void)
 #endif
 
 #if 0
-void select_ramrom_to_play(void)
+RECOMP_PATCH void select_ramrom_to_play(void)
 {
     s32 i;
     s32 temp_v0;

@@ -1356,3 +1356,89 @@ RECOMP_PATCH void menu_init(void) {
     }
 }
 #endif
+
+#if 0
+RECOMP_PATCH Gfx *speedgraphDisplayMetrics(Gfx *gdl)
+{
+#if defined(LEFTOVERDEBUG)
+    u32 *counters;
+    u32 localCountAccumulator = g_speedGraphCountAccumulator;
+    s32 *pmaxSeenCount = &g_speedGraphMaxSeenCount;
+    char buffer[12];
+    volatile u32 *pcountAccumulator = &g_speedGraphCountAccumulator;
+    
+    localCountAccumulator += speedgraphframes;
+
+    if (*pmaxSeenCount < speedgraphframes)
+    {
+        *pmaxSeenCount = speedgraphframes;
+    }
+
+    *pcountAccumulator = localCountAccumulator;
+    
+    if (localCountAccumulator > COUNT_REQUIRED_FOR_OUTPUT)
+    {
+        *pcountAccumulator = localCountAccumulator;
+
+        if (localCountAccumulator > COUNT_REQUIRED_FOR_OUTPUT)
+        {
+            do
+            {
+                localCountAccumulator -= COUNT_REQUIRED_FOR_OUTPUT;
+            }
+            while (localCountAccumulator > COUNT_REQUIRED_FOR_OUTPUT);
+
+            *pcountAccumulator = localCountAccumulator;
+        }
+        
+        counters = get_counters();
+
+        debmenuSetFgColour(255, 255, 255, 255);
+        debmenuSetEnvColor(0, 0, 0, 255);
+
+        // utz %
+        debmenuSetPos(8, 5);
+        sprintf_recomp(buffer, "X %f\n", (float)joyGetStickX(get_cur_playernum()));
+        debmenuPrintString(buffer);
+
+        // rsp %
+        debmenuSetPos(8, 6);
+        sprintf_recomp(buffer, "Y %f\n", (float)joyGetStickY(get_cur_playernum()));
+        debmenuPrintString(buffer);
+
+        // tex %
+        debmenuSetPos(8, 7);
+        sprintf_recomp(buffer, "tex %2.0f%%", ((counters[3] * 100.0f) / counters[0]));
+        debmenuPrintString(buffer);
+
+        // hz (60 / framerate)
+        // -- or 50 for PAL
+        debmenuSetPos(28, 5);
+        sprintf_recomp(buffer, "%2d hz", ((speedgraphframes == 0) ? 0 : (60 / speedgraphframes)));
+        debmenuPrintString(buffer);
+
+        // framerate
+        debmenuSetPos(28, 6);
+        sprintf_recomp(buffer, "%2d frames", speedgraphframes);
+        debmenuPrintString(buffer);
+
+        // (continues framerate output)
+        if (speedgraphframes != g_speedGraphMaxSeenCount)
+        {
+            sprintf_recomp(buffer, " [%2d]", *pmaxSeenCount);
+        }
+        else
+        {
+            sprintf_recomp(buffer, "     ");
+        }
+
+        debmenuPrintString(buffer);
+        
+        g_speedGraphMaxSeenCount = 0;
+    }
+
+    gSPDisplayList(gdl++, gSpeedGraphDisplayLists[gSpeedGraphDisplayListIndex ^ 1]);
+#endif
+    return gdl;
+}
+#endif

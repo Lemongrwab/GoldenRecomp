@@ -330,7 +330,15 @@ void interface_menu18_displaycast(void);
 void interface_menu19_spectrum(void);
 void do_extended_cast_display(s32 flag);
 s32 interface_menu0B_runstage(void);
+u32 *get_counters(void);
+void debmenuSetFgColour(s32 r, s32 g, s32 b, s32 a);
+void debmenuSetEnvColor(s32 r, s32 g, s32 b, s32 a);
+void debmenuSetPos(s32 x, s32 y);
+void debmenuPrintString(const unsigned char *str);
 
+extern s32 memusage_display_flag;
+extern Gfx gSpeedGraphDisplayLists[2][266];
+extern s32 gSpeedGraphDisplayListIndex;
 extern s32 selected_stage;
 extern GAMEMODE gamemode;
 extern MENU maybe_prev_menu;
@@ -433,5 +441,6 @@ extern s32 g_ClockTimer;
 extern s32 speedgraphframes;
 extern s32 frameDelay;
 extern u32 copy_of_osgetcount_value_1;
-
+extern u32 g_speedGraphCountAccumulator;
+extern s32 g_speedGraphMaxSeenCount;
 #endif

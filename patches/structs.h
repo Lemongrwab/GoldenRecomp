@@ -5,6 +5,8 @@
 
 #include "patches.h"
 
+#define COUNT_REQUIRED_FOR_OUTPUT 20
+
 #define OS_SC_STACKSIZE 0x2000
 
 #define OS_SC_RETRACE_MSG 1
@@ -4276,6 +4278,70 @@ typedef struct ramromfilestructure {
 struct ramrom_struct {
     ramromfilestructure* fdata;
     s32 locked;
+};
+
+struct MoveData {
+    // 0x0, bondviewProcessInput sp120
+    s32 analogWalk;   // sp120 ?
+    s32 analogStrafe; // sp124 ?
+    s32 analogPitch;  // sp128 ?
+    s32 analogTurn;   // sp12C ?
+
+    // 0x10
+    s32 controlStickYRaw;
+    s32 controlStickXRaw;
+    s32 controlStickYSafe;
+    s32 controlStickXSafe;
+
+    // 0x20
+    s32 disableLookAhead;
+    s32 invertPitch;
+    s32 canAutoAim;
+    s32 detonating;
+
+    // 0x30
+    s32 rLeanRight;
+    s32 rLeanLeft;
+    s32 crouchUp;
+    s32 crouchDown;
+
+    // 0x40, bondviewProcessInput sp160
+    f32 zoomInFovPersec;
+    // sp164
+    f32 zoomOutFovPersec;
+    s32 zooming;
+    s32 aiming;
+
+    // 0x50
+    s32 weaponForwardOffset;
+    s32 weaponBackOffset;
+    f32 aimTurnRightSpeed;
+    f32 aimTurnLeftSpeed;
+
+    // 0x60
+    f32 speedVertaUp;
+    f32 speedVertaDown;
+    f32 tankTurnRightSpeed;
+    f32 tankTurnLeftSpeed;
+
+    // 0x70
+    s32 digitalStepRight;
+    s32 digitalStepLeft;
+    s32 digitalStepBack;
+    s32 digitalStepForward;
+
+    // 0x80
+    s32 canNaturalPitch;
+    s32 canNaturalTurn;
+    s32 canTurnTank;
+    s32 canLookAhead;
+
+    // 0x90
+    s32 btap;
+    s32 triggerOn;
+    s32 canManualAim;
+    // sp1BC
+    s32 canSwivelGun;
 };
 
 #endif

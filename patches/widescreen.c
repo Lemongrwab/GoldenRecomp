@@ -192,7 +192,7 @@ RECOMP_PATCH f32 getinstsize(Model *arg0)
     }
     #endif
 
-    ret = arg0->obj->BoundingVolumeRadius * arg0->scale * 4;
+    ret = arg0->obj->BoundingVolumeRadius * arg0->scale * 10;
 
     return ret;
 }

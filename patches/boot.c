@@ -35,6 +35,8 @@ RECOMP_PATCH void init(void) {
 
     // @recomp: ModelDistance always disabled
     g_ModelDistanceDisabled = 1;
+
+    // memusage_display_flag = 1;
 }
 
 /**

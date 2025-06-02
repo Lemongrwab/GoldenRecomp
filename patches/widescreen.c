@@ -1,5 +1,6 @@
 #include "patches.h"
 
+#if 0
 RECOMP_PATCH Gfx* dynGetMasterDisplayList(void) {
     g_GfxRequestedDisplayList = TRUE;
 
@@ -11,6 +12,7 @@ RECOMP_PATCH Gfx* dynGetMasterDisplayList(void) {
 
     return gdl;
 }
+#endif
 
 // Set viewports (single player)
 #if 1
@@ -67,7 +69,7 @@ RECOMP_PATCH Gfx* bgScissorCurrentPlayerView(Gfx* gdl, s32 left, s32 top, s32 wi
     }
 
     // @recomp: use gEXSetScissor instead
-    // gDPSetScissor(arg0++, G_SC_NON_INTERLACE, left, top, width, height);
+    // gDPSetScissor(gdl++, G_SC_NON_INTERLACE, left, top, width, height);
     gEXSetScissor(gdl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 240);
 
     return gdl;
@@ -82,7 +84,7 @@ RECOMP_PATCH void modelSetDistanceDisabled(s32 param_1) {
 #endif
 
 #if 1
-RECOMP_PATCH Gfx *currentPlayerDrawFade(Gfx *gdl) {
+RECOMP_PATCH Gfx* currentPlayerDrawFade(Gfx* gdl) {
     f32 frac = g_CurrentPlayer->colourscreenfrac;
     s32 r = g_CurrentPlayer->colourscreenred;
     s32 g = g_CurrentPlayer->colourscreengreen;
@@ -105,8 +107,8 @@ RECOMP_PATCH Gfx *currentPlayerDrawFade(Gfx *gdl) {
         gDPSetTextureLUT(gdl++, G_TT_NONE);
         gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-        gDPSetPrimColor(gdl++, 0, 0, r, g, b, (s32)(frac * 255.0f));
-        
+        gDPSetPrimColor(gdl++, 0, 0, r, g, b, (s32) (frac * 255.0f));
+
         // gDPFillRectangle(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()),
         // (viGetViewTop() + viGetViewHeight()));
 
@@ -125,60 +127,83 @@ RECOMP_PATCH Gfx *currentPlayerDrawFade(Gfx *gdl) {
 
 // @recomp: Culling of objects on the sides.
 #if 1
-RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void) {
-    f32 fx = -320.0f * 4.0f;            // @recomp:
-    f32 fy = 0;                         // @recomp:
-    f32 fwidth = (f32) viGetX() * 4.0f; // @recomp:
-    f32 fheight = (f32) viGetY();       // @recomp:
 
-    g_CurrentPlayer->screenxminf = (f32) viGetViewLeft() + 320.0f * -4.0f; // @recomp:
+extern int demoMode;
 
-    if (g_CurrentPlayer->screenxminf < fx) {
-        g_CurrentPlayer->screenxminf = fx;
+RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void)  /* @theboy181 - WS hacks */
+{
+    f32 fx, fy, fwidth, fheight;
+
+    if (
+        demoMode != 0 ||
+        (g_StageNum == LEVELID_JUNGLE && intro_camera_index == CAMERAMODE_INTRO)
+    )
+    {
+        /* Use global bgViewRelated values (original min/max) */
+        fx = (f32) bgViewRelated[0];
+        fy = (f32) bgViewRelated[1];
+        fwidth = (f32) viGetX() + (f32) bgViewRelated[2];
+        fheight = (f32) viGetY() + (f32) bgViewRelated[3];
+
+        /* X min */
+        g_CurrentPlayer->screenxminf = (f32) viGetViewLeft();
+        if (g_CurrentPlayer->screenxminf < fx) g_CurrentPlayer->screenxminf = fx;
+        if (fwidth < g_CurrentPlayer->screenxminf) g_CurrentPlayer->screenxminf = fwidth;
+
+        /* Y min */
+        g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
+        if (g_CurrentPlayer->screenyminf < fy) g_CurrentPlayer->screenyminf = fy;
+        if (fheight < g_CurrentPlayer->screenyminf) g_CurrentPlayer->screenyminf = fheight;
+
+        /* X max */
+        g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth());
+        if (g_CurrentPlayer->screenxmaxf < fx) g_CurrentPlayer->screenxmaxf = fx;
+        if (fwidth < g_CurrentPlayer->screenxmaxf) g_CurrentPlayer->screenxmaxf = fwidth;
+
+        /* Y max */
+        g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
+        if (g_CurrentPlayer->screenymaxf < fy) g_CurrentPlayer->screenymaxf = fy;
+        if (fheight < g_CurrentPlayer->screenymaxf) g_CurrentPlayer->screenymaxf = fheight;
     }
+    else
+    {
+        /* Widescreen hack/fps fix path */
+        fx = -320.0f * 2.0f;
+        fy = 0.0f;
+        fwidth = (f32) viGetX() * 3.0f;
+        fheight = (f32) viGetY();
 
-    if (fwidth < g_CurrentPlayer->screenxminf) {
-        g_CurrentPlayer->screenxminf = fwidth;
-    }
+        /* X min */
+        g_CurrentPlayer->screenxminf = (f32) viGetViewLeft() + 320.0f * -4.0f;
+        if (g_CurrentPlayer->screenxminf < fx) g_CurrentPlayer->screenxminf = fx;
+        if (fwidth < g_CurrentPlayer->screenxminf) g_CurrentPlayer->screenxminf = fwidth;
 
-    g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
+        /* Y min */
+        g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
+        if (g_CurrentPlayer->screenyminf < fy) g_CurrentPlayer->screenyminf = fy;
+        if (fheight < g_CurrentPlayer->screenyminf) g_CurrentPlayer->screenyminf = fheight;
 
-    if (g_CurrentPlayer->screenyminf < fy) {
-        g_CurrentPlayer->screenyminf = fy;
-    }
+        /* X max */
+        g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth() + 320.0f * 4.0f);
+        if (g_CurrentPlayer->screenxmaxf < fx) g_CurrentPlayer->screenxmaxf = fx;
+        if (fwidth < g_CurrentPlayer->screenxmaxf) g_CurrentPlayer->screenxmaxf = fwidth;
 
-    if (fheight < g_CurrentPlayer->screenyminf) {
-        g_CurrentPlayer->screenyminf = fheight;
-    }
-
-    g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth() + 320.0f * 4.0f); // @recomp:
-
-    if (g_CurrentPlayer->screenxmaxf < fx) {
-        g_CurrentPlayer->screenxmaxf = fx;
-    }
-
-    if (fwidth < g_CurrentPlayer->screenxmaxf) {
-        g_CurrentPlayer->screenxmaxf = fwidth;
-    }
-
-    g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
-
-    if (g_CurrentPlayer->screenymaxf < fy) {
-        g_CurrentPlayer->screenymaxf = fy;
-    }
-
-    if (fheight < g_CurrentPlayer->screenymaxf) {
-        g_CurrentPlayer->screenymaxf = fheight;
+        /* Y max */
+        g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
+        if (g_CurrentPlayer->screenymaxf < fy) g_CurrentPlayer->screenymaxf = fy;
+        if (fheight < g_CurrentPlayer->screenymaxf) g_CurrentPlayer->screenymaxf = fheight;
     }
 }
 #endif
 
 #if 1
-RECOMP_PATCH f32 getinstsize(Model *arg0)
+extern int demoMode;
+
+RECOMP_PATCH f32 getinstsize(Model *arg0)  // @theboy181
 {   
     f32 ret = 0.0f;
 
-    #if defined(LEFTOVERDEBUG)
+#if defined(LEFTOVERDEBUG)
     if (arg0 == NULL)
     {
         osSyncPrintf("getinstsize: no objinst!\n");
@@ -190,11 +215,61 @@ RECOMP_PATCH f32 getinstsize(Model *arg0)
         osSyncPrintf("getinstsize: no objdesc!\n");
         return_null();
     }
-    #endif
+#endif
 
-    ret = arg0->obj->BoundingVolumeRadius * arg0->scale * 10;
+    if (demoMode == 0) { // @theboy181 - fps fix - Demo timing fix
+        ret = arg0->obj->BoundingVolumeRadius * arg0->scale * 4;
+    } else {
+        ret = arg0->obj->BoundingVolumeRadius * arg0->scale;
+    } // @recomp:
 
     return ret;
+}
+#endif
+
+#if 1
+RECOMP_PATCH f32 getPlayer_c_lodscalez(void) {
+    return g_CurrentPlayer->c_lodscalez / 8; // @theboy181 - Proper LOD fix?
+}
+#endif
+
+#if 0
+RECOMP_PATCH Gfx* bgScissorCurrentPlayerViewDefault(Gfx* gdl)
+{
+#if 1
+    static int counterstrike = 0;
+
+    if (counterstrike++ % 20) {
+        recomp_printf("g_CurrentPlayer->viewleft: %d g_CurrentPlayer->viewx: %d g_CurrentPlayer->viewtop: %d g_CurrentPlayer->viewy: %d sum: %d\n", 
+            g_CurrentPlayer->viewleft,
+            g_CurrentPlayer->viewx,
+            g_CurrentPlayer->viewtop, 
+            g_CurrentPlayer->viewy, 
+            g_CurrentPlayer->viewtop + g_CurrentPlayer->viewy);
+    }
+#endif
+
+    return bgScissorCurrentPlayerView(
+        gdl,
+        g_CurrentPlayer->viewleft,
+        g_CurrentPlayer->viewtop,
+        g_CurrentPlayer->viewleft + g_CurrentPlayer->viewx,
+        g_CurrentPlayer->viewtop + g_CurrentPlayer->viewy);
+}
+#endif
+
+#if 0
+RECOMP_PATCH s16 get_curplayer_viewport_ulx(void)
+{
+    if (2 < getPlayerCount())
+    {
+        if ((get_cur_playernum() == 1) || (get_cur_playernum() == 3))
+        {
+                return 161 ;
+        }
+    }
+
+    return 0;
 }
 #endif
 
@@ -312,4 +387,77 @@ RECOMP_PATCH Gfx* chrobjRenderProp(PropRecord* prop, Gfx* gdl, s32 arg2) __attri
     return mrData.gdl;
 }
 
+#endif
+
+// Intro GunBarrel stretch fix
+#if 1
+extern f32 D_8002BB00;
+extern f32 D_8002BB04;
+extern f32 D_8002BB08;
+extern f32 D_8002BB0C;
+extern f32 D_8002BB10;
+extern f32 D_8002BB14;
+
+struct FolderSelect {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+};
+
+extern f32 D_8002BB00;
+extern f32 D_8002BB04;
+extern f32 D_8002BB08;
+extern f32 D_8002BB0C;
+extern f32 D_8002BB10;
+extern f32 D_8002BB14;
+
+RECOMP_PATCH Gfx* sub_GAME_7F01B240(Gfx* gdl, s32 imgIndex, s32 x, struct FolderSelect* arg3,
+                                    struct FolderSelect* arg4) {
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f14_2;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    s32 i;
+    s32 var_t1;
+
+    temp_f0 = arg3->unk00;
+    temp_f2 = arg3->unk04;
+    temp_f12 = arg3->unk08;
+    temp_f14 = arg4->unk00;
+    temp_f16 = arg4->unk04;
+    temp_f18 = arg4->unk08;
+    D_8002BB0C = temp_f14;
+    D_8002BB10 = temp_f16;
+    D_8002BB14 = temp_f18;
+    gEXEnable(gdl++);
+    i = 0;
+    while ((i + 1) < 300) {
+        gDPLoadTextureBlock(gdl++, imgIndex, G_IM_FMT_I, G_IM_SIZ_8b, 440, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+
+        gDPSetPrimColor(gdl++, 0, 0, temp_f0 + (((temp_f14 - temp_f0) * i) / 299.0f),
+                        temp_f2 + (((temp_f16 - temp_f2) * i) / 299.0f),
+                        temp_f12 + (((temp_f18 - temp_f12) * i) / 299.0f), 255);
+
+        if (x < 0) {
+            gEXTextureRectangle(gdl++, G_EX_ORIGIN_CENTER, G_EX_ORIGIN_CENTER, 0 - 880, (i + 0x10) << 2,
+                                ((440 << 2) - 1) - 880, ((((i + 1) + 0x10)) << 2) - 1, G_TX_RENDERTILE, (-x) << 5, 0,
+                                1 << 10, 1 << 10);
+        } else {
+            gEXTextureRectangle(gdl++, G_EX_ORIGIN_CENTER, G_EX_ORIGIN_CENTER, (x << 2) - 880, (i + 0x10) << 2,
+                                ((440 << 2) - 1) - 880, ((((i + 1) + 0x10)) << 2) - 1, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        }
+        i++;
+        imgIndex += 440;
+    }
+    D_8002BB08 = temp_f12;
+    D_8002BB04 = temp_f2;
+    D_8002BB00 = temp_f0;
+
+    return gdl;
+}
 #endif

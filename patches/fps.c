@@ -16,7 +16,7 @@ RECOMP_PATCH s8* bgDebPrintROOMID(s32 roomId) {
 }
 #endif
 
-#if 1
+#if 0
 RECOMP_PATCH void waitForNextFrame(void) __attribute__((optnone)) // maybe WaitForTick
 {
     u32 nextFrameTime; // next frame time?
@@ -30,3 +30,16 @@ RECOMP_PATCH void waitForNextFrame(void) __attribute__((optnone)) // maybe WaitF
     updateFrameCounters(nextFrameTime);
 }
 #endif
+
+void waitForNextFrame2(void) // @theboy181 - Improtant for proper fps
+{
+    u32 nextFrameTime;
+
+    do {
+        nextFrameTime = ((osGetCount_recomp() - copy_of_osgetcount_value_1) + MAIN_LOOP_TICK_INTERVAL) /
+                        ((MAIN_LOOP_TICK_INTERVAL * 2) + 1);
+    } while (nextFrameTime < frameDelay);
+
+    frameDelay = speedgraphframes;
+    updateFrameCounters(nextFrameTime);
+}

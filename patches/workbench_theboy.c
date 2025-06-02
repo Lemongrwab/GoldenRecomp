@@ -1,6 +1,9 @@
 #include "patches.h"
 
-#if 0
+int demoMode = 0;
+
+void waitForNextFrame2();  // @theboy181 - Improtant for proper fps
+#if 1
 RECOMP_PATCH Gfx *sub_GAME_7F009254(Gfx *gdl) {
     D_8002A7D0 = (1 - D_8002A7D0);
     switch (gunbarrel_mode - 2)
@@ -118,6 +121,10 @@ RECOMP_PATCH Gfx *sub_GAME_7F009254(Gfx *gdl) {
         }
         break;
     };
+
+    if ((gunbarrel_mode - 2) != 0) { // @theboy181 - fps fix - Gunbarrel mode
+        waitForNextFrame2();
+    }
 
     return gdl;
 }
@@ -379,7 +386,7 @@ RECOMP_PATCH void bondviewMovePlayerUpdateViewport(s8 stick_x, s8 stick_y, u16 b
 }
 #endif
 
-#if 0
+#if 1
 
 long strtol(const char* nptr, char** endptr, int base) {
     const char* s = nptr;
@@ -445,6 +452,22 @@ long strtol(const char* nptr, char** endptr, int base) {
     return sign * result;
 }
 
+#define BASE_FPS 60
+static int desiredFPS = 30;
+static int frameSkipInterval;
+static int frameSkipCounter = 0;
+
+void InitFrameRateControl(void)
+{
+    if (desiredFPS <= 0 || desiredFPS > BASE_FPS) {
+        desiredFPS = BASE_FPS;
+    }
+    frameSkipInterval = BASE_FPS / desiredFPS;
+    if (frameSkipInterval < 1) {
+        frameSkipInterval = 1;
+    }
+}
+
 #define MAIN_LOOP_TICK_INTERVAL 0x5eb61U
 
 RECOMP_PATCH void bossMainloop(void) {
@@ -473,7 +496,10 @@ RECOMP_PATCH void bossMainloop(void) {
 
     u32 unused_stackpadding_[56];
 
+    s32 multiplier = speedgraphframes;
+
     // end declarations
+
 
     done = 0;
     reset_mem_bank_5();
@@ -501,6 +527,8 @@ RECOMP_PATCH void bossMainloop(void) {
 
     nowCount = osGetCount_recomp();
     randomSetSeed(nowCount);
+
+    InitFrameRateControl();
 
     // 'done' value never changes, and control never breaks -- infinite loop
     while (!done) {
@@ -600,8 +628,11 @@ RECOMP_PATCH void bossMainloop(void) {
                      */
 #endif
                     mainTickElapsed = (u32) (osGetCount_recomp() - copy_of_osgetcount_value_1);
-                    if (mainTickElapsed < MAIN_LOOP_TICK_INTERVAL) {
-                        // nothing to do.
+                    // @theboy181 - fps fix - demo mode
+                    if ((demoMode == 1 && mainTickElapsed < (MAIN_LOOP_TICK_INTERVAL * (speedgraphframes * 2))) ||
+                    (demoMode != 1 && mainTickElapsed < MAIN_LOOP_TICK_INTERVAL)) 
+                    {
+                        break; // Skip frame
                     } else {
                         if (g_MainStageNum < 0 && pendingGfx < 2U) {
                             if (get_is_ramrom_flag()) {
@@ -609,14 +640,20 @@ RECOMP_PATCH void bossMainloop(void) {
                             } else {
                                 waitForNextFrame();
                             }
-
+                            
                             speedgraphRenderGraph();
                             speedgraphMarkerCommit();
                             speedgraphMarkerHandler(0x20000);
                             joyConsumeSamplesWrapper();
                             permit_stderr(0);
-
+                            
                             gdl = firstGdl = dynGetMasterDisplayList();
+
+                            gEXEnable(gdl++); // @theboy181 - better place for this 
+                            gEXSetRefreshRate(gdl++, 60 / speedgraphframes); // @theboy181
+
+                            //recomp_printf("gunbarrel_mode = %d\n", speedgraphframes);
+
 
 #ifdef DEBUGMENU
                             // ported from pd beta, official way to open debug menu
@@ -678,7 +715,7 @@ RECOMP_PATCH void bossMainloop(void) {
 
                             gdl = debmenuDraw(gdl);
 
-                            if (get_memusage_display_flag()) {
+                            if (0 /* get_memusage_display_flag() */) { // @theboy181 - Enable/Disable onscreen HZ
                                 gdl = speedgraphDisplayMetrics(gdl);
                             }
 
@@ -775,10 +812,12 @@ RECOMP_PATCH void bossMainloop(void) {
         ;
 
     sub_GAME_7F0D1A7C();
+
+
 }
 #endif
 
-#if 0
+#if 1
 RECOMP_PATCH void interface_menu00_legalscreen(void)
 {
 #ifdef REFRESH_PAL
@@ -799,6 +838,7 @@ RECOMP_PATCH void interface_menu00_legalscreen(void)
     }
 #endif
     g_MenuTimer += g_ClockTimer;
+    demoMode = 0;
 
     if (g_MenuTimer >= MENU_LEGALSCREEN_MENU_TIMER_MAX)
     {
@@ -822,6 +862,8 @@ RECOMP_PATCH void interface_menu00_legalscreen(void)
             frontChangeMenu(MENU_NINTENDO_LOGO, TRUE);
         }
     }
+    
+
 }
 #endif
 
@@ -833,6 +875,8 @@ RECOMP_PATCH void interface_menu05_fileselect(void)
     Mtxf spC8;
     Mtxf sp88;
     struct coord3d *sp54;
+
+    demoMode = 0;
 
     if (((((joyGetButtonsPressedThisFrame(PLAYER_1, ANY_BUTTON) != 0) || (joyGetStickX(0) < -5)) || (joyGetStickX(0) >= 6)) || (joyGetStickY(0) < -5)) || (joyGetStickY(0) >= 6))
     {
@@ -1034,6 +1078,7 @@ RECOMP_PATCH void interface_menu05_fileselect(void)
     {
         frontChangeMenu(MENU_LEGAL_SCREEN, TRUE);
     }
+    
 }
 #endif
 
@@ -1440,5 +1485,21 @@ RECOMP_PATCH Gfx *speedgraphDisplayMetrics(Gfx *gdl)
     gSPDisplayList(gdl++, gSpeedGraphDisplayLists[gSpeedGraphDisplayListIndex ^ 1]);
 #endif
     return gdl;
+}
+#endif
+
+#if 1
+RECOMP_PATCH void select_ramrom_to_play(void)
+{
+    s32 i;
+    s32 temp_v0;
+    demoMode = 1;
+
+    temp_v0 = fileGetHighestStageUnlockedAnyFolder();
+
+    for (i = 0; ramrom_table[i].fdata != NULL && temp_v0 >= ramrom_table[i].locked; i++)
+    {}
+
+    replay_recorded_ramrom_at_address(ramrom_table[randomGetNext() % i].fdata);
 }
 #endif

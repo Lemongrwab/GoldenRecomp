@@ -2,37 +2,60 @@
 #include "gbi_extension.h"
 
 #if 1
-RECOMP_PATCH Gfx *sub_GAME_7F097818(Gfx *gdl, SkyRelated38 *v1, SkyRelated38 *v2, SkyRelated38 *v3, f32 scale, bool textured)
-{
+RECOMP_PATCH Gfx* sub_GAME_7F097818(Gfx* gdl, SkyRelated38* v1, SkyRelated38* v2, SkyRelated38* v3, f32 scale,
+                                    bool textured) {
     u32 width = viGetX();
     u32 height = viGetY();
-    u32 fill_color = GPACK_RGBA5551(60, 90, 255, 1); // Light blue sky color
 
+    // Fetch the current environment (this is where fog and sky color are stored)
+    struct CurrentEnvironmentRecord* env = fogGetCurrentEnvironmentp();
+
+    // Get the fog color components (assumes fog color is stored in RGBA format)
+    u8 red = env->Red;
+    u8 green = env->Green;
+    u8 blue = env->Blue;
+
+    // Set the fog color as the fill color for the skybox
+    u32 fill_color = GPACK_RGBA5551(red, green, blue, 1); // Fog color instead of hardcoded light blue
+
+    // Fill the skybox with the fog color
     gDPPipeSync(gdl++);
     gDPSetCycleType(gdl++, G_CYC_FILL);
     gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, osViGetCurrentFramebuffer());
     gDPSetFillColor(gdl++, (fill_color << 16) | fill_color);
-    gDPFillRectangle(gdl++, 0, 0, (width - 1) , (height - 1) );
+    gDPFillRectangle(gdl++, 0, 0, (width - 1), (height - 1));
     gDPPipeSync(gdl++);
 
     return gdl;
 }
 
-RECOMP_PATCH Gfx *sub_GAME_7F098A2C(Gfx *gdl, SkyRelated38 *arg1, SkyRelated38 *arg2, SkyRelated38 *arg3, SkyRelated38 *arg4, f32 arg5)
-{
-    u32 width = viGetX() ;
+RECOMP_PATCH Gfx* sub_GAME_7F098A2C(Gfx* gdl, SkyRelated38* arg1, SkyRelated38* arg2, SkyRelated38* arg3,
+                                    SkyRelated38* arg4, f32 arg5) {
+    u32 width = viGetX();
     u32 height = viGetY();
-    u32 fill_color = GPACK_RGBA5551(60, 90, 255, 1); // Light blue sky color
 
+    // Fetch the current environment to get fog color
+    struct CurrentEnvironmentRecord* env = fogGetCurrentEnvironmentp();
+
+    // Get the fog color components
+    u8 red = env->Red;
+    u8 green = env->Green;
+    u8 blue = env->Blue;
+
+    // Set the fog color as the fill color for the skybox
+    u32 fill_color = GPACK_RGBA5551(red, green, blue, 1); // Use fog color for the background
+
+    // Fill the skybox with the fog color
     gDPPipeSync(gdl++);
     gDPSetCycleType(gdl++, G_CYC_FILL);
     gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, osViGetCurrentFramebuffer());
     gDPSetFillColor(gdl++, (fill_color << 16) | fill_color);
-    gDPFillRectangle(gdl++, 0, 0, (width - 1) , (height - 1) );
+    gDPFillRectangle(gdl++, 0, 0, (width - 1), (height - 1));
     gDPPipeSync(gdl++);
 
     return gdl;
 }
+
 #endif
 
 #define PORTSKY 1

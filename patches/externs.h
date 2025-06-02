@@ -336,6 +336,7 @@ void debmenuSetEnvColor(s32 r, s32 g, s32 b, s32 a);
 void debmenuSetPos(s32 x, s32 y);
 void debmenuPrintString(const unsigned char *str);
 
+extern s32 intro_camera_index;
 extern s32 memusage_display_flag;
 extern Gfx gSpeedGraphDisplayLists[2][266];
 extern s32 gSpeedGraphDisplayListIndex;

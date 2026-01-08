@@ -31,6 +31,7 @@ RECOMP_PATCH void waitForNextFrame(void) __attribute__((optnone)) // maybe WaitF
 }
 #endif
 
+#if 1
 void waitForNextFrame2(void) // @theboy181 - Improtant for proper fps
 {
     u32 nextFrameTime;
@@ -43,3 +44,4 @@ void waitForNextFrame2(void) // @theboy181 - Improtant for proper fps
     frameDelay = speedgraphframes;
     updateFrameCounters(nextFrameTime);
 }
+#endif

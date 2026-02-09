@@ -79,7 +79,11 @@ RECOMP_PATCH Gfx* bgScissorCurrentPlayerView(Gfx* gdl, s32 left, s32 top, s32 wi
 #if 1
 RECOMP_PATCH void modelSetDistanceDisabled(s32 param_1) {
     // @recomp: ModelDistance always disabled
-    g_ModelDistanceDisabled = 1;
+    if ((g_StageNum == LEVELID_JUNGLE)) {
+        g_ModelDistanceDisabled = 0;
+    } else {
+        g_ModelDistanceDisabled = 1;
+    }
 }
 #endif
 
@@ -130,15 +134,11 @@ RECOMP_PATCH Gfx* currentPlayerDrawFade(Gfx* gdl) {
 
 extern int demoMode;
 
-RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void)  /* @theboy181 - WS hacks */
+RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void) /* @theboy181 - WS hacks */
 {
     f32 fx, fy, fwidth, fheight;
 
-    if (
-        demoMode != 0 ||
-        (g_StageNum == LEVELID_JUNGLE && intro_camera_index == CAMERAMODE_INTRO)
-    )
-    {
+    if (demoMode != 0 || (g_StageNum == LEVELID_JUNGLE && intro_camera_index == CAMERAMODE_INTRO)) {
         /* Use global bgViewRelated values (original min/max) */
         fx = (f32) bgViewRelated[0];
         fy = (f32) bgViewRelated[1];
@@ -147,26 +147,32 @@ RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void)  /* @theboy181 - WS ha
 
         /* X min */
         g_CurrentPlayer->screenxminf = (f32) viGetViewLeft();
-        if (g_CurrentPlayer->screenxminf < fx) g_CurrentPlayer->screenxminf = fx;
-        if (fwidth < g_CurrentPlayer->screenxminf) g_CurrentPlayer->screenxminf = fwidth;
+        if (g_CurrentPlayer->screenxminf < fx)
+            g_CurrentPlayer->screenxminf = fx;
+        if (fwidth < g_CurrentPlayer->screenxminf)
+            g_CurrentPlayer->screenxminf = fwidth;
 
         /* Y min */
         g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
-        if (g_CurrentPlayer->screenyminf < fy) g_CurrentPlayer->screenyminf = fy;
-        if (fheight < g_CurrentPlayer->screenyminf) g_CurrentPlayer->screenyminf = fheight;
+        if (g_CurrentPlayer->screenyminf < fy)
+            g_CurrentPlayer->screenyminf = fy;
+        if (fheight < g_CurrentPlayer->screenyminf)
+            g_CurrentPlayer->screenyminf = fheight;
 
         /* X max */
         g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth());
-        if (g_CurrentPlayer->screenxmaxf < fx) g_CurrentPlayer->screenxmaxf = fx;
-        if (fwidth < g_CurrentPlayer->screenxmaxf) g_CurrentPlayer->screenxmaxf = fwidth;
+        if (g_CurrentPlayer->screenxmaxf < fx)
+            g_CurrentPlayer->screenxmaxf = fx;
+        if (fwidth < g_CurrentPlayer->screenxmaxf)
+            g_CurrentPlayer->screenxmaxf = fwidth;
 
         /* Y max */
         g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
-        if (g_CurrentPlayer->screenymaxf < fy) g_CurrentPlayer->screenymaxf = fy;
-        if (fheight < g_CurrentPlayer->screenymaxf) g_CurrentPlayer->screenymaxf = fheight;
-    }
-    else
-    {
+        if (g_CurrentPlayer->screenymaxf < fy)
+            g_CurrentPlayer->screenymaxf = fy;
+        if (fheight < g_CurrentPlayer->screenymaxf)
+            g_CurrentPlayer->screenymaxf = fheight;
+    } else {
         /* Widescreen hack/fps fix path */
         fx = -320.0f * 2.0f;
         fy = 0.0f;
@@ -175,23 +181,31 @@ RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void)  /* @theboy181 - WS ha
 
         /* X min */
         g_CurrentPlayer->screenxminf = (f32) viGetViewLeft() + 320.0f * -4.0f;
-        if (g_CurrentPlayer->screenxminf < fx) g_CurrentPlayer->screenxminf = fx;
-        if (fwidth < g_CurrentPlayer->screenxminf) g_CurrentPlayer->screenxminf = fwidth;
+        if (g_CurrentPlayer->screenxminf < fx)
+            g_CurrentPlayer->screenxminf = fx;
+        if (fwidth < g_CurrentPlayer->screenxminf)
+            g_CurrentPlayer->screenxminf = fwidth;
 
         /* Y min */
         g_CurrentPlayer->screenyminf = (f32) viGetViewTop();
-        if (g_CurrentPlayer->screenyminf < fy) g_CurrentPlayer->screenyminf = fy;
-        if (fheight < g_CurrentPlayer->screenyminf) g_CurrentPlayer->screenyminf = fheight;
+        if (g_CurrentPlayer->screenyminf < fy)
+            g_CurrentPlayer->screenyminf = fy;
+        if (fheight < g_CurrentPlayer->screenyminf)
+            g_CurrentPlayer->screenyminf = fheight;
 
         /* X max */
         g_CurrentPlayer->screenxmaxf = (f32) (viGetViewLeft() + viGetViewWidth() + 320.0f * 4.0f);
-        if (g_CurrentPlayer->screenxmaxf < fx) g_CurrentPlayer->screenxmaxf = fx;
-        if (fwidth < g_CurrentPlayer->screenxmaxf) g_CurrentPlayer->screenxmaxf = fwidth;
+        if (g_CurrentPlayer->screenxmaxf < fx)
+            g_CurrentPlayer->screenxmaxf = fx;
+        if (fwidth < g_CurrentPlayer->screenxmaxf)
+            g_CurrentPlayer->screenxmaxf = fwidth;
 
         /* Y max */
         g_CurrentPlayer->screenymaxf = (f32) (viGetViewTop() + viGetViewHeight());
-        if (g_CurrentPlayer->screenymaxf < fy) g_CurrentPlayer->screenymaxf = fy;
-        if (fheight < g_CurrentPlayer->screenymaxf) g_CurrentPlayer->screenymaxf = fheight;
+        if (g_CurrentPlayer->screenymaxf < fy)
+            g_CurrentPlayer->screenymaxf = fy;
+        if (fheight < g_CurrentPlayer->screenymaxf)
+            g_CurrentPlayer->screenymaxf = fheight;
     }
 }
 #endif
@@ -199,19 +213,17 @@ RECOMP_PATCH void bgUpdateCurrentPlayerScreenMinMax(void)  /* @theboy181 - WS ha
 #if 1
 extern int demoMode;
 
-RECOMP_PATCH f32 getinstsize(Model *arg0)  // @theboy181
-{   
+RECOMP_PATCH f32 getinstsize(Model* arg0) // @theboy181
+{
     f32 ret = 0.0f;
 
 #if defined(LEFTOVERDEBUG)
-    if (arg0 == NULL)
-    {
+    if (arg0 == NULL) {
         osSyncPrintf("getinstsize: no objinst!\n");
         return_null();
     }
 
-    if (arg0->obj == NULL)
-    {
+    if (arg0->obj == NULL) {
         osSyncPrintf("getinstsize: no objdesc!\n");
         return_null();
     }
@@ -459,5 +471,39 @@ RECOMP_PATCH Gfx* sub_GAME_7F01B240(Gfx* gdl, s32 imgIndex, s32 x, struct Folder
     D_8002BB00 = temp_f0;
 
     return gdl;
+}
+#endif
+
+#if 1
+extern s32 g_ContRumblePakInitState[4];
+extern OSMesgQueue g_ContInputMessageQueue;
+extern OSPfs g_ContPfs[4];
+extern OSContStatus g_ContStatus[4];
+RECOMP_PATCH void joyRumblePakInit(s32 index) {
+    s32 ret;
+
+#if 0
+   if (g_ContRumblePakInitState[index] > -1) {
+       recomp_printf("if (g_ContRumblePakInitState[index] > -1) {\n");
+       if ((g_ContStatus[index].type & CONT_JOYPORT) && (g_ContStatus[index].status & CONT_CARD_ON)) {
+           ret = osPfsInit_recomp(&g_ContInputMessageQueue, &g_ContPfs[index], index);
+           recomp_printf ("ret: %d\n", ret);
+           recomp_printf("if ((g_ContStatus[index].type & CONT_JOYPORT) && (g_ContStatus[index].status & CONT_CARD_ON)) {\n");
+
+           if ((ret == PFS_ERR_ID_FATAL) || (ret == PFS_ERR_DEVICE)) {
+               if (osMotorInit_recomp(&g_ContInputMessageQueue, &g_ContPfs[index], index) == 0) {
+                   g_ContRumblePakInitState[index] = 1;
+                   recomp_printf("RUMBLEPAKINITSTATE_READY\n");
+               } else {
+                   g_ContRumblePakInitState[index] = -1;
+                   recomp_printf("RUMBLEPAKINITSTATE_ERROR\n");
+               }
+           }
+       }
+   }
+#endif
+
+    // @recomp: force rumble pak plugged in.
+    g_ContRumblePakInitState[index] = 1;
 }
 #endif

@@ -79,11 +79,11 @@ RECOMP_PATCH Gfx* bgScissorCurrentPlayerView(Gfx* gdl, s32 left, s32 top, s32 wi
 #if 1
 RECOMP_PATCH void modelSetDistanceDisabled(s32 param_1) {
     // @recomp: ModelDistance always disabled
-    if ((g_StageNum == LEVELID_JUNGLE)) {
-        g_ModelDistanceDisabled = 0;
-    } else {
+    // if ((g_StageNum == LEVELID_JUNGLE)) {
+    //     g_ModelDistanceDisabled = 0;
+    // } else {
         g_ModelDistanceDisabled = 1;
-    }
+    // }
 }
 #endif
 
